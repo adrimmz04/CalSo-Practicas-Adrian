@@ -25,7 +25,7 @@ public final class ExecuteCleaningProgramUseCase implements IExecuteCleaningProg
             CleaningProduct product = requirement.getKey();
             int required = requirement.getValue();
             int available = inventory.available(product);
-            if (available <= required && required > 0) {
+            if (available < required) {
                 missing.put(product, required);
             } else {
                 inventory.consume(product, required);
