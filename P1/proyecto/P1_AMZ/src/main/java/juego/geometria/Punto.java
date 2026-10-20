@@ -112,12 +112,14 @@ public class Punto {
 		return getClass().getName() + " [x=" + x + ", y=" + y + "]";
 	}
 
-	
-	public boolean equals(Punto obj) {
+	@Override
+	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
+		if (!(obj instanceof Punto other))
+			return false;
 
-		return  (x == obj.x && y == obj.y);
+		return  (x == other.x && y == other.y);
 	}
 
 }
