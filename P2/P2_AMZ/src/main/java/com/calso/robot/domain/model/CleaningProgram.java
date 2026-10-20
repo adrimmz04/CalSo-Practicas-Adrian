@@ -45,11 +45,11 @@ public final class CleaningProgram {
     
     @Override
     public boolean equals(Object other) {
-        return other instanceof CleaningProgram p && name.equals(p.name);
+        return other instanceof CleaningProgram p && id.equals(p.id);
     }
     
     @Override
     public int hashCode() { 
-        return name.hashCode(); 
+        return id.hashCode(); 
     }
 }
