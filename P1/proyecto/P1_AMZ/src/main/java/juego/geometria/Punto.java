@@ -5,7 +5,7 @@ package juego.geometria;
  *
  */
 public class Punto {
-    public final static int defaultValue = 0;
+    public static final int defaultValue = 0;
 
      final int x;
      final int y;
