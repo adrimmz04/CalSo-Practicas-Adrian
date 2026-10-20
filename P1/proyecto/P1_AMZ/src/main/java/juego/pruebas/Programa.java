@@ -4,7 +4,7 @@ import juego.geometria.Punto;
 
 public class Programa {
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
       Punto punto1 = new Punto();
 
       Punto puntos[] = new Punto[2]; 
