@@ -1,4 +1,5 @@
 package com.calso.robot.domain.model;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import com.calso.robot.domain.valueobjects.Energy;
@@ -22,7 +23,7 @@ public final class CleaningProgram {
         
         this.id = id; 
         this.name = name; 
-        this.requirements = requirements;
+        this.requirements = new HashMap<>(requirements);
     }
     
     public String getId() { 
