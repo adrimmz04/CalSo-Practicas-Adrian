@@ -27,11 +27,19 @@ public final class ExecuteCleaningProgramUseCase implements IExecuteCleaningProg
             int available = inventory.available(product);
             if (available < required) {
                 missing.put(product, required - available);
-            } else {
-                inventory.consume(product, required);
             }
         }
         
-        return new ExecutionResult(missing.isEmpty(), missing);
+        if (!missing.isEmpty()) {
+            return new ExecutionResult(false, missing);
+        }
+        
+        for (var requirement : program.getRequirements().entrySet()) {
+            if (requirement.getValue() > 0) {
+                inventory.consume(requirement.getKey(), requirement.getValue());
+            }
+        }
+        
+        return new ExecutionResult(true, missing);
     }
 }
