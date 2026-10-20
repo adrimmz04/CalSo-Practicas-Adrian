@@ -72,7 +72,7 @@ Las líneas se refieren al código original. El orden es el que muestra la vista
 
 **Localización:** `src/main/java/juego/geometria/Direccion.java`, línea 19  
 **Responsable:** Adrián Martínez Zamora  
-**Commit:** `pendiente`
+**Commit:** `0fb7dc6`
 
 **Problema detectado**
 
@@ -88,7 +88,7 @@ Se han movido los corchetes al tipo: `Direccion[] arrayDirecciones`.
 
 **Localización:** `src/main/java/juego/geometria/Direccion.java`, línea 21  
 **Responsable:** Adrián Martínez Zamora  
-**Commit:** `pendiente`
+**Commit:** `b5a9107`
 
 **Problema detectado**
 
@@ -104,7 +104,7 @@ Se ha declarado un único generador como constante del enum (`private static fin
 
 **Localización:** `src/main/java/juego/pruebas/Programa.java`, línea 7  
 **Responsable:** Adrián Martínez Zamora  
-**Commit:** `pendiente`
+**Commit:** `2accdfa`
 
 **Problema detectado**
 
@@ -120,7 +120,7 @@ Se ha cambiado a `String[] args`.
 
 **Localización:** `src/main/java/juego/pruebas/Programa.java`, línea 10  
 **Responsable:** Adrián Martínez Zamora  
-**Commit:** `pendiente`
+**Commit:** `1f51280`
 
 **Problema detectado**
 
@@ -136,7 +136,7 @@ Se ha cambiado a `Punto[] puntos`.
 
 **Localización:** `src/main/java/juego/pruebas/Programa.java`, línea 20  
 **Responsable:** Adrián Martínez Zamora  
-**Commit:** `pendiente`
+**Commit:** `fddaf76`
 
 **Problema detectado**
 
@@ -152,7 +152,7 @@ Se ha añadido un `java.util.logging.Logger` como constante de la clase (`privat
 
 **Localización:** `src/main/java/juego/pruebas/Programa.java`, línea 18  
 **Responsable:** Adrián Martínez Zamora  
-**Commit:** `pendiente`
+**Commit:** `70a7892`
 
 **Problema detectado**
 
@@ -168,7 +168,7 @@ Se ha sustituido la comparación por `info.isEmpty()`, que comprueba el contenid
 
 **Localización:** `src/main/java/juego/pruebas/Programa.java`, línea 16  
 **Responsable:** Adrián Martínez Zamora  
-**Commit:** `pendiente`
+**Commit:** `5f5e34f`
 
 **Problema detectado**
 
@@ -184,7 +184,7 @@ Se asigna el resultado: `info = info.concat(punto.toString());`.
 
 **Localización:** `src/main/java/juego/geometria/Punto.java`, líneas 113-118 (método `distancia`)  
 **Responsable:** Adrián Martínez Zamora  
-**Commit:** `pendiente`
+**Commit:** `858fb78`
 
 **Problema detectado**
 
@@ -201,7 +201,7 @@ Se ha eliminado el método `distancia` junto con su comentario. Al tratarse de c
 
 **Localización:** `src/main/java/juego/geometria/Punto.java`, línea 126  
 **Responsable:** Adrián Martínez Zamora  
-**Commit:** `pendiente`
+**Commit:** `0efd8b5`
 
 **Problema detectado**
 
@@ -229,7 +229,7 @@ public boolean equals(Object obj) {
 
 **Localización:** `src/main/java/juego/geometria/Punto.java`, líneas 135-146 (método `clone`)  
 **Responsable:** Adrián Martínez Zamora  
-**Commit:** `pendiente`
+**Commit:** `18a5f2e`
 
 **Problema detectado**
 
@@ -247,7 +247,7 @@ Se ha eliminado el método `clone()`, como indica la regla S2975. La clase ya di
 
 **Localización:** `src/main/java/juego/geometria/Punto.java`, línea 130  
 **Responsable:** Adrián Martínez Zamora  
-**Commit:** `pendiente`
+**Commit:** `dbef99d`
 
 **Problema detectado**
 
@@ -263,7 +263,7 @@ Se ha eliminado la variable auxiliar con el cast y se usan directamente los camp
 
 **Localización:** `src/main/java/juego/geometria/Punto.java`, línea 3  
 **Responsable:** Adrián Martínez Zamora  
-**Commit:** `pendiente`
+**Commit:** `412c924`
 
 **Problema detectado**
 
@@ -279,7 +279,7 @@ Se ha eliminado `import java.lang.Math;`.
 
 **Localización:** `src/main/java/juego/geometria/Punto.java`, línea 4  
 **Responsable:** Adrián Martínez Zamora  
-**Commit:** `pendiente`
+**Commit:** `52d38e3`
 
 **Problema detectado**
 
@@ -295,7 +295,7 @@ Se ha eliminado `import java.util.Random;`.
 
 **Localización:** `src/main/java/juego/geometria/Punto.java`, línea 11  
 **Responsable:** Adrián Martínez Zamora  
-**Commit:** `pendiente`
+**Commit:** `ed2a69c`
 
 **Problema detectado**
 
@@ -311,7 +311,7 @@ Se ha renombrado a `DEFAULT_VALUE` mediante *Refactor > Rename*.
 
 **Localización:** `src/main/java/juego/geometria/Punto.java`, línea 51  
 **Responsable:** Adrián Martínez Zamora  
-**Commit:** `pendiente`
+**Commit:** `8abc213`
 
 **Problema detectado**
 
@@ -327,7 +327,7 @@ Se ha renombrado a `adyacente` mediante *Refactor > Rename*, que actualiza tambi
 
 **Localización:** `src/main/java/juego/geometria/Punto.java`, línea 82  
 **Responsable:** Adrián Martínez Zamora  
-**Commit:** `pendiente`
+**Commit:** `48fffbb`
 
 **Problema detectado**
 
@@ -343,7 +343,7 @@ Se ha renombrado a `situacionRelativa` mediante *Refactor > Rename*.
 
 **Localización:** `src/main/java/juego/geometria/Punto.java`, línea 11  
 **Responsable:** Adrián Martínez Zamora  
-**Commit:** `pendiente`
+**Commit:** `32b2bc8`
 
 **Problema detectado**
 
@@ -359,7 +359,7 @@ Se han reordenado a `public static final`.
 
 **Localización:** `src/main/java/juego/geometria/circulo.java`, línea 10  
 **Responsable:** Adrián Martínez Zamora  
-**Commit:** `pendiente`
+**Commit:** `bf24016`
 
 **Problema detectado**
 
@@ -375,7 +375,7 @@ En lugar de eliminar el parámetro (que forma parte del funcionamiento esperado 
 
 **Localización:** `src/main/java/juego/geometria/circulo.java`, línea 3  
 **Responsable:** Adrián Martínez Zamora  
-**Commit:** `pendiente`
+**Commit:** `eb04229`
 
 **Problema detectado**
 
@@ -391,7 +391,7 @@ Se ha renombrado la clase a `Circulo` mediante *Refactor > Rename*, lo que renom
 
 **Localización:** `src/main/java/juego/geometria/Punto.java`, método `equals`  
 **Responsable:** Adrián Martínez Zamora  
-**Commit:** `pendiente`
+**Commit:** `d35b9cb`
 
 **Problema detectado**
 
@@ -414,36 +414,36 @@ public int hashCode() {
 
 | Nº | Regla Sonar | Responsable | Commit | Resultado |
 |---:|---|---|---|---|
-| 1 | `java:S1197` | Adrián Martínez Zamora | `pendiente` | Pendiente |
-| 2 | `java:S2119` | Adrián Martínez Zamora | `pendiente` | Pendiente |
-| 3 | `java:S1197` | Adrián Martínez Zamora | `pendiente` | Pendiente |
-| 4 | `java:S1197` | Adrián Martínez Zamora | `pendiente` | Pendiente |
-| 5 | `java:S106` | Adrián Martínez Zamora | `pendiente` | Pendiente |
-| 6 | `java:S4973` | Adrián Martínez Zamora | `pendiente` | Pendiente |
-| 7 | `java:S2201` | Adrián Martínez Zamora | `pendiente` | Pendiente |
-| 8 | `java:S2184` | Adrián Martínez Zamora | `pendiente` (mismo que 16) | Pendiente |
-| 9 | `java:S2184` | Adrián Martínez Zamora | `pendiente` (mismo que 16) | Pendiente |
-| 10 | `java:S1201` | Adrián Martínez Zamora | `pendiente` | Pendiente |
-| 11 | `java:S2975` | Adrián Martínez Zamora | `pendiente` | Pendiente |
-| 12 | `java:S108` | Adrián Martínez Zamora | `pendiente` (mismo que 11) | Pendiente |
-| 13 | `java:S1905` | Adrián Martínez Zamora | `pendiente` | Pendiente |
-| 14 | `java:S1128` | Adrián Martínez Zamora | `pendiente` | Pendiente |
-| 15 | `java:S1128` | Adrián Martínez Zamora | `pendiente` | Pendiente |
-| 16 | `java:S1144` | Adrián Martínez Zamora | `pendiente` | Pendiente |
-| 17 | `java:S115` | Adrián Martínez Zamora | `pendiente` | Pendiente |
-| 18 | `java:S100` | Adrián Martínez Zamora | `pendiente` | Pendiente |
-| 19 | `java:S100` | Adrián Martínez Zamora | `pendiente` | Pendiente |
-| 20 | `java:S1124` | Adrián Martínez Zamora | `pendiente` | Pendiente |
-| 21 | `java:S2225` | Adrián Martínez Zamora | `pendiente` (mismo que 11) | Pendiente |
-| 22 | `java:S1172` | Adrián Martínez Zamora | `pendiente` | Pendiente |
-| 23 | `java:S101` | Adrián Martínez Zamora | `pendiente` | Pendiente |
-| 24 | `java:S1206` | Adrián Martínez Zamora | `pendiente` | Pendiente |
+| 1 | `java:S1197` | Adrián Martínez Zamora | `0fb7dc6` | Resuelta |
+| 2 | `java:S2119` | Adrián Martínez Zamora | `b5a9107` | Resuelta |
+| 3 | `java:S1197` | Adrián Martínez Zamora | `2accdfa` | Resuelta |
+| 4 | `java:S1197` | Adrián Martínez Zamora | `1f51280` | Resuelta |
+| 5 | `java:S106` | Adrián Martínez Zamora | `fddaf76` | Resuelta |
+| 6 | `java:S4973` | Adrián Martínez Zamora | `70a7892` | Resuelta |
+| 7 | `java:S2201` | Adrián Martínez Zamora | `5f5e34f` | Resuelta |
+| 8 | `java:S2184` | Adrián Martínez Zamora | `858fb78` | Resuelta |
+| 9 | `java:S2184` | Adrián Martínez Zamora | `858fb78` | Resuelta |
+| 10 | `java:S1201` | Adrián Martínez Zamora | `0efd8b5` | Resuelta |
+| 11 | `java:S2975` | Adrián Martínez Zamora | `18a5f2e` | Resuelta |
+| 12 | `java:S108` | Adrián Martínez Zamora | `18a5f2e` | Resuelta |
+| 13 | `java:S1905` | Adrián Martínez Zamora | `dbef99d` | Resuelta |
+| 14 | `java:S1128` | Adrián Martínez Zamora | `412c924` | Resuelta |
+| 15 | `java:S1128` | Adrián Martínez Zamora | `52d38e3` | Resuelta |
+| 16 | `java:S1144` | Adrián Martínez Zamora | `858fb78` | Resuelta |
+| 17 | `java:S115` | Adrián Martínez Zamora | `ed2a69c` | Resuelta |
+| 18 | `java:S100` | Adrián Martínez Zamora | `8abc213` | Resuelta |
+| 19 | `java:S100` | Adrián Martínez Zamora | `48fffbb` | Resuelta |
+| 20 | `java:S1124` | Adrián Martínez Zamora | `32b2bc8` | Resuelta |
+| 21 | `java:S2225` | Adrián Martínez Zamora | `18a5f2e` | Resuelta |
+| 22 | `java:S1172` | Adrián Martínez Zamora | `bf24016` | Resuelta |
+| 23 | `java:S101` | Adrián Martínez Zamora | `eb04229` | Resuelta |
+| 24 | `java:S1206` | Adrián Martínez Zamora | `d35b9cb` | Resuelta |
 
 ---
 
 ## 6. Análisis final
 
-Una vez realizadas todas las modificaciones se ha vuelto a ejecutar el análisis del proyecto completo con **SonarQube for Eclipse**.
+Una vez realizadas todas las modificaciones se ha vuelto a ejecutar el análisis del proyecto completo con **SonarQube for Eclipse**. El análisis final no muestra ninguna disconformidad (*0 items*): se han resuelto las 23 disconformidades iniciales y la nº 24, surgida durante las correcciones, mediante 20 commits de corrección.
 
 ### Captura final
 
@@ -478,9 +478,9 @@ El proyecto incluido en esta carpeta contiene las modificaciones correspondiente
 - [x] Se identifica al autor de la práctica.
 - [x] Se incluye la captura del análisis inicial.
 - [x] Se han documentado todas las disconformidades inicialmente detectadas.
-- [ ] Cada solución está asociada a un commit identificable en `main`.
+- [x] Cada solución está asociada a un commit identificable en `main`.
 - [x] Se identifica el responsable de cada corrección.
-- [ ] Se incluye la captura del análisis final.
-- [ ] La captura final permite comprobar que no quedan disconformidades.
+- [x] Se incluye la captura del análisis final.
+- [x] La captura final permite comprobar que no quedan disconformidades.
 - [x] Se ha incorporado el proyecto Eclipse final dentro de `P1/proyecto/`.
-- [ ] El proyecto final corresponde al código analizado en la captura final.
+- [x] El proyecto final corresponde al código analizado en la captura final.
