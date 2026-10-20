@@ -1,0 +1,11 @@
+# Salida de compilación de Eclipse
+bin/
+target/
+*.class
+
+# Ficheros del workspace / IDE
+.metadata/
+.recommenders/
+*.launch
+.DS_Store
+Thumbs.db
