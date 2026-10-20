@@ -1,4 +1,5 @@
 package com.calso.robot.domain.model;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -39,7 +40,7 @@ public final class CleaningProgram {
     }
     
     public Map<CleaningProduct,Integer> getRequirements() { 
-        return requirements; 
+        return Collections.unmodifiableMap(requirements); 
     }
     
     @Override
