@@ -6,6 +6,9 @@ public record ExecutionResult(boolean executed, Map<CleaningProduct,Integer> mis
     
     public ExecutionResult {
         Objects.requireNonNull(missingProducts, "missingProducts");
+        if (executed && !missingProducts.isEmpty()) {
+            throw new IllegalArgumentException("An executed program cannot have missing products");
+        }
         missingProducts = Map.copyOf(missingProducts);
     }
 }
