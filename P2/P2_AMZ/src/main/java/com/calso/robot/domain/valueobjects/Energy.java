@@ -19,11 +19,14 @@ public final class Energy {
     
     @Override
     public boolean equals(Object other) { 
-        return this == other; 
+        if (this == other) {
+            return true;
+        }
+        return other instanceof Energy energy && units == energy.units; 
     }
     
     @Override
     public int hashCode() { 
-        return System.identityHashCode(this); 
+        return Integer.hashCode(units); 
     }
 }
