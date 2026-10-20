@@ -1,5 +1,7 @@
 package juego.geometria;
 
+import java.util.Objects;
+
 /** La clase Punto representa un punto inmutable en el espacio bidimensional.
  *  Una vez creado el objeto no puede cambiar de estado.
  *
@@ -120,6 +122,11 @@ public class Punto {
 			return false;
 
 		return  (x == other.x && y == other.y);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(x, y);
 	}
 
 }
