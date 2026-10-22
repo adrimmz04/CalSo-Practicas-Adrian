@@ -439,33 +439,157 @@ Una prueba que pasa sin comprobar correctamente el resultado esperado no es evid
 
 ### Integrantes, responsabilidades y enlaces de integración
 
-*Completar.*
+| Integrante | Responsabilidad |
+| --- | --- |
+| Adrián Martínez Zamora | Práctica realizada de forma individual: pruebas de dominio, comparador, caso de uso y adaptador; suplantador `StubCleaningInventory`; corrección de defectos; configuración de GitHub Actions y SonarQube; documentación. |
+
+Al ser un grupo individual, todos los cambios se han realizado directamente en `main`, sin ramas ni Pull Requests. Cada bloque de pruebas tiene su propio commit y cada defecto se corrige en un commit independiente posterior, de modo que el historial permite relacionar cada prueba con el defecto que revela y con su corrección.
+
+Proyecto Maven: [`P2/P2_AMZ/`](P2_AMZ/) · Workflow: [`.github/workflows/p2-quality.yml`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/blob/main/.github/workflows/p2-quality.yml) ([`163912b`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/163912b))
 
 ### Casos de prueba
 
+Batería final: **78 métodos de prueba** (84 ejecuciones, contando las 3 pruebas parametrizadas) en 8 clases. Las pruebas se han diseñado a partir de `docs/specification.md` (valores normales, límites, entradas inválidas, igualdad, ordenación y ausencia de efectos), son independientes y cada una prepara sus propios datos.
+
 | ID | Clase | Condición y resultado esperado | Método JUnit |
 | --- | --- | --- | --- |
-| | | | |
+| EN-01 | `Energy` | Límite inferior válido: `Energy.of(1)` almacena 1 | `testGivenUnits1WhenCreatingEnergyThenStoresValue1` |
+| EN-02 | `Energy` | Valor normal: `Energy.of(10)` almacena 10 | `testGivenUnits10WhenCreatingEnergyThenStoresValue10` |
+| EN-03 | `Energy` | Límite superior: `Integer.MAX_VALUE` se almacena sin cambios | `testGivenMaxIntegerUnitsWhenCreatingEnergyThenStoresMaxIntegerValue` |
+| EN-04 | `Energy` | Límite inválido: 0 unidades lanza `IllegalArgumentException` | `testGivenUnits0WhenCreatingEnergyThenThrowsIllegalArgumentException` |
+| EN-05 | `Energy` | Parametrizada (-1, -10, `MIN_VALUE`): valores negativos lanzan `IllegalArgumentException` | `testGivenNegativeUnitsWhenCreatingEnergyThenThrowsIllegalArgumentException` |
+| EN-06 | `Energy` | Dos instancias de 10 unidades son iguales (`equals`) | `testGivenTwoEnergiesWithUnits10WhenComparingThenTheyAreEqual` |
+| EN-07 | `Energy` | Dos instancias de 10 unidades tienen el mismo `hashCode` | `testGivenTwoEnergiesWithUnits10WhenComputingHashCodeThenHashCodesAreEqual` |
+| EN-08 | `Energy` | 10 y 11 unidades no son iguales | `testGivenEnergiesWithUnits10And11WhenComparingThenTheyAreNotEqual` |
+| EN-09 | `Energy` | `equals(null)` devuelve `false` | `testGivenEnergyWithUnits10WhenComparingWithNullThenTheyAreNotEqual` |
+| EN-10 | `Energy` | Comparar con un objeto de otro tipo (`Integer` 10) devuelve `false` | `testGivenEnergyWithUnits10WhenComparingWithIntegerValue10ThenTheyAreNotEqual` |
+| PR-01 | `CleaningProduct` | `values()` devuelve WATER, SOAP, WAX, GLASS_CLEANER en ese orden | `testGivenCleaningProductEnumWhenListingValuesThenReturnsWaterSoapWaxAndGlassCleanerInOrder` |
+| PR-02 | `CleaningProduct` | `WATER.toString()` es `agua` | `testGivenWaterWhenConvertingToStringThenReturnsAgua` |
+| PR-03 | `CleaningProduct` | `SOAP.toString()` es `jabón` (con tilde) | `testGivenSoapWhenConvertingToStringThenReturnsJabonWithAccent` |
+| PR-04 | `CleaningProduct` | `WAX.toString()` es `cera` | `testGivenWaxWhenConvertingToStringThenReturnsCera` |
+| PR-05 | `CleaningProduct` | `GLASS_CLEANER.toString()` es `limpiacristales` | `testGivenGlassCleanerWhenConvertingToStringThenReturnsLimpiacristales` |
+| PG-01 | `CleaningProgram` | Construcción válida: los cuatro *getters* devuelven los valores recibidos | `testGivenIdP1NameBasicEnergy5AndWater2WhenCreatingProgramThenGettersReturnThoseValues` |
+| PG-02 | `CleaningProgram` | Mapa de requisitos vacío es válido | `testGivenEmptyRequirementsWhenCreatingProgramThenRequirementsAreEmpty` |
+| PG-03 | `CleaningProgram` | Cantidad 0 (límite) es válida y se almacena | `testGivenRequirementWater0WhenCreatingProgramThenStoresWaterQuantity0` |
+| PG-04 | `CleaningProgram` | Sin límite de productos: se almacenan los cuatro | `testGivenAllFourProductsRequiredWhenCreatingProgramThenStoresFourRequirements` |
+| PG-05 | `CleaningProgram` | `id` nulo lanza `IllegalArgumentException` | `testGivenNullIdWhenCreatingProgramThenThrowsIllegalArgumentException` |
+| PG-06 | `CleaningProgram` | Parametrizada (`""`, `" "`, `"\t\n"`): `id` en blanco lanza `IllegalArgumentException` | `testGivenBlankIdWhenCreatingProgramThenThrowsIllegalArgumentException` |
+| PG-07 | `CleaningProgram` | `name` nulo lanza `IllegalArgumentException` | `testGivenNullNameWhenCreatingProgramThenThrowsIllegalArgumentException` |
+| PG-08 | `CleaningProgram` | Parametrizada: `name` en blanco lanza `IllegalArgumentException` | `testGivenBlankNameWhenCreatingProgramThenThrowsIllegalArgumentException` |
+| PG-09 | `CleaningProgram` | `energy` nulo lanza `NullPointerException` | `testGivenNullEnergyWhenCreatingProgramThenThrowsNullPointerException` |
+| PG-10 | `CleaningProgram` | `requirements` nulo lanza `NullPointerException` | `testGivenNullRequirementsWhenCreatingProgramThenThrowsNullPointerException` |
+| PG-11 | `CleaningProgram` | Clave de producto nula lanza `IllegalArgumentException` | `testGivenRequirementWithNullProductWhenCreatingProgramThenThrowsIllegalArgumentException` |
+| PG-12 | `CleaningProgram` | Cantidad nula lanza `IllegalArgumentException` | `testGivenRequirementWaterWithNullQuantityWhenCreatingProgramThenThrowsIllegalArgumentException` |
+| PG-13 | `CleaningProgram` | Cantidad -1 lanza `IllegalArgumentException` | `testGivenRequirementWaterMinus1WhenCreatingProgramThenThrowsIllegalArgumentException` |
+| PG-14 | `CleaningProgram` | Copia defensiva: modificar una cantidad del mapa original no afecta al programa | `testGivenOriginalMapChangedFromWater2ToWater5AfterCreationWhenGettingRequirementsThenWaterIsStill2` |
+| PG-15 | `CleaningProgram` | Copia defensiva: añadir un producto al mapa original no afecta al programa | `testGivenSoapAddedToOriginalMapAfterCreationWhenGettingRequirementsThenSoapIsAbsent` |
+| PG-16 | `CleaningProgram` | El mapa de `getRequirements()` no es modificable | `testGivenProgramWithWater2WhenAddingSoapToReturnedRequirementsThenThrowsUnsupportedOperationException` |
+| PG-17 | `CleaningProgram` | Mismo `id` con nombre, energía y requisitos distintos: iguales | `testGivenProgramsWithSameIdP1AndDifferentNameEnergyAndRequirementsWhenComparingThenTheyAreEqual` |
+| PG-18 | `CleaningProgram` | Mismo `id` y distinto nombre: mismo `hashCode` | `testGivenProgramsWithSameIdP1AndDifferentNamesWhenComputingHashCodeThenHashCodesAreEqual` |
+| PG-19 | `CleaningProgram` | `id` distinto y mismo nombre: no iguales | `testGivenProgramsWithIdsP1AndP2AndSameNameBasicWhenComparingThenTheyAreNotEqual` |
+| PG-20 | `CleaningProgram` | `equals(null)` devuelve `false` | `testGivenProgramP1WhenComparingWithNullThenTheyAreNotEqual` |
+| PG-21 | `CleaningProgram` | Comparar con un `String` igual al id devuelve `false` | `testGivenProgramP1WhenComparingWithStringP1ThenTheyAreNotEqual` |
+| CO-01 | `CleaningProgramByEnergyComparator` | Energía 3 frente a 5: resultado negativo (orden ascendente) | `testGivenEnergies3And5WhenComparingProgramsThenReturnsNegative` |
+| CO-02 | `CleaningProgramByEnergyComparator` | Energía 5 frente a 3: resultado positivo | `testGivenEnergies5And3WhenComparingProgramsThenReturnsPositive` |
+| CO-03 | `CleaningProgramByEnergyComparator` | La energía prevalece sobre el id: (1, "Z") va antes que (2, "A") | `testGivenEnergy1WithIdZAndEnergy2WithIdAWhenComparingProgramsThenLowerEnergyGoesFirst` |
+| CO-04 | `CleaningProgramByEnergyComparator` | Empate de energía: id "A" antes que "B" | `testGivenSameEnergy4AndIdsAAndBWhenComparingProgramsThenReturnsNegative` |
+| CO-05 | `CleaningProgramByEnergyComparator` | Empate de energía: id "B" después de "A" | `testGivenSameEnergy4AndIdsBAndAWhenComparingProgramsThenReturnsPositive` |
+| CO-06 | `CleaningProgramByEnergyComparator` | Misma energía y mismo id: devuelve 0 (contrato de `Comparator`) | `testGivenSameEnergy4AndSameIdAWithDifferentNamesWhenComparingProgramsThenReturns0` |
+| CO-07 | `CleaningProgramByEnergyComparator` | Ordenar [5, 1, 3] produce [1, 3, 5] (`assertIterableEquals`) | `testGivenProgramsWithEnergies5And1And3WhenSortingThenOrdersEnergies1And3And5` |
+| CO-08 | `CleaningProgramByEnergyComparator` | Ordenar con ambos criterios: B(1), A(2), C(2) | `testGivenEnergy2IdsCAndAAndEnergy1IdBWhenSortingThenOrdersBThenAThenC` |
+| ST-01 | `StubCleaningInventory` | Devuelve las existencias iniciales registradas | `testGivenWater3WhenQueryingWaterThenReturns3` |
+| ST-02 | `StubCleaningInventory` | Producto no registrado: devuelve 0 | `testGivenStockWithoutWaxWhenQueryingWaxThenReturns0` |
+| ST-03 | `StubCleaningInventory` | Consumo válido descuenta la cantidad | `testGivenWater3WhenConsumingWater2ThenWaterBecomes1` |
+| ST-04 | `StubCleaningInventory` | Consumo exacto deja 0 | `testGivenWater3WhenConsumingWater3ThenWaterBecomes0` |
+| ST-05 | `StubCleaningInventory` | Consumir 0 no cambia existencias | `testGivenWater3WhenConsumingWater0ThenWaterRemains3` |
+| ST-06 | `StubCleaningInventory` | Consumir más de lo disponible lanza `IllegalArgumentException` sin alterar el inventario | `testGivenWater3WhenConsumingWater4ThenThrowsIllegalArgumentExceptionAndWaterRemains3` |
+| ST-07 | `StubCleaningInventory` | Cantidad negativa lanza `IllegalArgumentException` sin alterar el inventario | `testGivenWater3WhenConsumingWaterMinus1ThenThrowsIllegalArgumentExceptionAndWaterRemains3` |
+| ST-08 | `StubCleaningInventory` | Consumir un producto no registrado lanza `IllegalArgumentException` | `testGivenStockWithoutWaxWhenConsumingWax1ThenThrowsIllegalArgumentException` |
+| ST-09 | `StubCleaningInventory` | Cada instancia conserva su propio estado | `testGivenTwoInventoriesWithWater3WhenConsumingWater2InFirstThenSecondKeepsWater3` |
+| ST-10 | `StubCleaningInventory` | Copia de las existencias iniciales | `testGivenInitialMapChangedFromWater3ToWater9AfterCreationWhenQueryingWaterThenReturns3` |
+| ST-11 | `StubCleaningInventory` | Existencias iniciales negativas se rechazan | `testGivenInitialStockWaterMinus1WhenCreatingInventoryThenThrowsIllegalArgumentException` |
+| UC-01 | `ExecuteCleaningProgramUseCase` | Existencias suficientes: ejecuta, sin faltantes, agua 5 → 3 | `testGivenWater5WhenExecutingProgramRequiringWater2ThenExecutesAndWaterStockBecomes3` |
+| UC-02 | `ExecuteCleaningProgramUseCase` | Existencias exactas: ejecuta y agua 2 → 0 | `testGivenWater2WhenExecutingProgramRequiringWater2ThenExecutesAndWaterStockBecomes0` |
+| UC-03 | `ExecuteCleaningProgramUseCase` | Dos productos (jabón exacto): ejecuta y descuenta ambos | `testGivenWater4AndSoap2WhenExecutingProgramRequiringWater1AndSoap2ThenExecutesAndStocksBecomeWater3AndSoap0` |
+| UC-04 | `ExecuteCleaningProgramUseCase` | Faltante: informa de las 2 unidades adicionales de jabón | `testGivenSoap1WhenExecutingProgramRequiringSoap3ThenNotExecutedAndReportsSoap2Missing` |
+| UC-05 | `ExecuteCleaningProgramUseCase` | Rechazo: el jabón insuficiente no se descuenta | `testGivenSoap1WhenExecutingProgramRequiringSoap3ThenSoapStockRemains1` |
+| UC-06 | `ExecuteCleaningProgramUseCase` | Producto sin existencias: faltan 2 de cera | `testGivenEmptyStockWhenExecutingProgramRequiringWax2ThenReportsWax2Missing` |
+| UC-07 | `ExecuteCleaningProgramUseCase` | Varios faltantes: informa de todos (agua 2, jabón 2) | `testGivenWater1AndSoap0WhenExecutingProgramRequiringWater3AndSoap2ThenReportsWater2AndSoap2Missing` |
+| UC-08 | `ExecuteCleaningProgramUseCase` | Rechazo: no se descuenta el agua, aunque sea suficiente | `testGivenWater5AndSoap0WhenExecutingProgramRequiringWater2AndSoap1ThenWaterStockRemains5` |
+| UC-09 | `ExecuteCleaningProgramUseCase` | Escenario de la especificación: falta jabón 1 e inventario intacto | `testGivenWater2AndSoap0WhenExecutingProgramRequiringWater2AndSoap1ThenReportsSoap1MissingAndPreservesStock` |
+| UC-10 | `ExecuteCleaningProgramUseCase` | Programa sin productos: ejecuta sin descuentos | `testGivenWater2WhenExecutingProgramWithoutRequirementsThenExecutesAndWaterStockRemains2` |
+| UC-11 | `ExecuteCleaningProgramUseCase` | Requisito 0 con inventario vacío: ejecuta | `testGivenEmptyStockWhenExecutingProgramRequiringWater0ThenExecutesWithoutMissingProducts` |
+| UC-12 | `ExecuteCleaningProgramUseCase` | Requisito 0: no descuenta existencias | `testGivenWater3WhenExecutingProgramRequiringWater0ThenWaterStockRemains3` |
+| UC-13 | `ExecuteCleaningProgramUseCase` | Inventario nulo lanza `NullPointerException` | `testGivenNullInventoryWhenCreatingUseCaseThenThrowsNullPointerException` |
+| UC-14 | `ExecuteCleaningProgramUseCase` | Programa nulo lanza `NullPointerException` | `testGivenWater2WhenExecutingNullProgramThenThrowsNullPointerException` |
+| RE-01 | `ExecutionResult` | Resultado ejecutado y sin faltantes | `testGivenExecutedTrueAndEmptyMapWhenCreatingResultThenIsExecutedWithoutMissingProducts` |
+| RE-02 | `ExecutionResult` | Resultado rechazado con jabón 1 faltante | `testGivenExecutedFalseAndSoap1MissingWhenCreatingResultThenIsNotExecutedAndReportsSoap1` |
+| RE-03 | `ExecutionResult` | `executed == true` con faltantes se rechaza | `testGivenExecutedTrueAndSoap1MissingWhenCreatingResultThenThrowsIllegalArgumentException` |
+| RE-04 | `ExecutionResult` | Mapa nulo lanza `NullPointerException` | `testGivenNullMissingProductsWhenCreatingResultThenThrowsNullPointerException` |
+| RE-05 | `ExecutionResult` | El mapa devuelto no es modificable | `testGivenSoap1MissingWhenAddingWaxToReturnedMissingProductsThenThrowsUnsupportedOperationException` |
+| RE-06 | `ExecutionResult` | Modificar el mapa original no afecta al resultado | `testGivenOriginalMapWithSoap1ChangedToSoap7AfterCreationWhenGettingMissingProductsThenSoapIsStill1` |
+| SV-01 | `CleaningRobotService` | Delega en el caso de uso: ejecución permitida y descuento | `testGivenWater2WhenExecutingProgramRequiringWater2ThroughServiceThenExecutesAndWaterStockBecomes0` |
+| SV-02 | `CleaningRobotService` | Delega en el caso de uso: ejecución rechazada con faltantes | `testGivenSoap0WhenExecutingProgramRequiringSoap1ThroughServiceThenReportsSoap1Missing` |
+| SV-03 | `CleaningRobotService` | Inventario nulo lanza `NullPointerException` | `testGivenNullInventoryWhenCreatingServiceThenThrowsNullPointerException` |
 
 ### Defectos detectados y corregidos
 
+Se han detectado y corregido **11 defectos**. En cada caso, el commit de la prueba se hizo con la prueba fallando y el commit de la corrección la pone en verde.
+
 | ID | Prueba que revela el defecto | Esperado / observado | Causa y corrección | Commit |
 | --- | --- | --- | --- | --- |
-| | | | | |
+| D1 | EN-04 `testGivenUnits0WhenCreatingEnergyThenThrowsIllegalArgumentException` | Esperado: `IllegalArgumentException`. Observado: crea `Energy` con 0 unidades | `Energy.of` comprobaba `units < 0`. Se cambia a `units <= 0` (`Energy.java`, `of`) | Prueba: [`22d2626`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/22d2626)<br>Corrección: [`1517695`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/1517695) |
+| D2 | EN-06 `testGivenTwoEnergiesWithUnits10WhenComparingThenTheyAreEqual`<br>EN-07 `testGivenTwoEnergiesWithUnits10WhenComputingHashCodeThenHashCodesAreEqual` | Esperado: iguales y mismo `hashCode`. Observado: distintos | `equals` comparaba referencias y `hashCode` usaba `System.identityHashCode`. Ahora se basan en `units` (`Energy.java`, `equals`/`hashCode`) | Prueba: [`22d2626`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/22d2626)<br>Corrección: [`2815929`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/2815929) |
+| D3 | PR-05 `testGivenGlassCleanerWhenConvertingToStringThenReturnsLimpiacristales` | Esperado: `limpiacristales`. Observado: `cristales` | Etiqueta incorrecta del enum (`CleaningProduct.java`) | Prueba: [`188528c`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/188528c)<br>Corrección: [`812ea20`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/812ea20) |
+| D4 | PG-14 `testGivenOriginalMapChangedFromWater2ToWater5AfterCreationWhenGettingRequirementsThenWaterIsStill2`<br>PG-15 `testGivenSoapAddedToOriginalMapAfterCreationWhenGettingRequirementsThenSoapIsAbsent` | Esperado: agua 2 / jabón ausente. Observado: agua 5 / jabón presente | El constructor guardaba la referencia al mapa recibido. Se guarda `new HashMap<>(requirements)` (`CleaningProgram.java`, constructor) | Prueba: [`2a09f06`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/2a09f06)<br>Corrección: [`d20b9d3`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/d20b9d3) |
+| D5 | PG-16 `testGivenProgramWithWater2WhenAddingSoapToReturnedRequirementsThenThrowsUnsupportedOperationException` | Esperado: `UnsupportedOperationException`. Observado: el mapa se modifica | `getRequirements` devolvía el mapa interno. Devuelve `Collections.unmodifiableMap(...)` (`CleaningProgram.java`, `getRequirements`) | Prueba: [`2a09f06`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/2a09f06)<br>Corrección: [`c51ae91`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/c51ae91) |
+| D6 | PG-17 `testGivenProgramsWithSameIdP1AndDifferentNameEnergyAndRequirementsWhenComparingThenTheyAreEqual`<br>PG-18 `testGivenProgramsWithSameIdP1AndDifferentNamesWhenComputingHashCodeThenHashCodesAreEqual`<br>PG-19 `testGivenProgramsWithIdsP1AndP2AndSameNameBasicWhenComparingThenTheyAreNotEqual` | Esperado: igualdad por `id`. Observado: igualdad por `name` | `equals`/`hashCode` usaban `name`. Se basan en `id` (`CleaningProgram.java`) | Prueba: [`2a09f06`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/2a09f06)<br>Corrección: [`a255f05`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/a255f05) |
+| D7 | CO-01 `testGivenEnergies3And5WhenComparingProgramsThenReturnsNegative`<br>CO-07 `testGivenProgramsWithEnergies5And1And3WhenSortingThenOrdersEnergies1And3And5` | Esperado: orden ascendente [1, 3, 5]. Observado: descendente [5, 3, 1] | `Integer.compare(second, first)` invertía el orden. Se usa `Integer.compare(first, second)` (`CleaningProgramByEnergyComparator.java`, `compare`) | Prueba: [`7b6eb48`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/7b6eb48)<br>Corrección: [`14939c5`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/14939c5) |
+| D8 | UC-02 `testGivenWater2WhenExecutingProgramRequiringWater2ThenExecutesAndWaterStockBecomes0` | Esperado: ejecuta, agua 0. Observado: no ejecuta, agua 2 | La condición `available <= required` trataba la disponibilidad exacta como insuficiente. Pasa a `available < required` (`ExecuteCleaningProgramUseCase.java`, `execute`) | Prueba: [`e31afb6`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/e31afb6)<br>Corrección: [`125b431`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/125b431) |
+| D9 | UC-04 `testGivenSoap1WhenExecutingProgramRequiringSoap3ThenNotExecutedAndReportsSoap2Missing`<br>UC-07 `testGivenWater1AndSoap0WhenExecutingProgramRequiringWater3AndSoap2ThenReportsWater2AndSoap2Missing` | Esperado: faltan jabón 2. Observado: jabón 3 | Se registraba la cantidad requerida total. Se registra `required - available` (`ExecuteCleaningProgramUseCase.java`, `execute`) | Prueba: [`e31afb6`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/e31afb6)<br>Corrección: [`1cb63e4`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/1cb63e4) |
+| D10 | UC-08 `testGivenWater5AndSoap0WhenExecutingProgramRequiringWater2AndSoap1ThenWaterStockRemains5`<br>UC-09 `testGivenWater2AndSoap0WhenExecutingProgramRequiringWater2AndSoap1ThenReportsSoap1MissingAndPreservesStock` | Esperado: agua 5 tras el rechazo. Observado: agua 3 | Se descontaba cada producto suficiente durante la comprobación. Ahora se comprueban todos y solo se descuenta si no falta ninguno (`ExecuteCleaningProgramUseCase.java`, `execute`) | Prueba: [`e31afb6`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/e31afb6)<br>Corrección: [`7d4db29`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/7d4db29) |
+| D11 | RE-03 `testGivenExecutedTrueAndSoap1MissingWhenCreatingResultThenThrowsIllegalArgumentException` | Esperado: `IllegalArgumentException`. Observado: se crea el resultado | El *record* no validaba que `executed == true` implica faltantes vacíos. El constructor compacto lo comprueba (`ExecutionResult.java`) | Prueba: [`feaa584`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/feaa584)<br>Corrección: [`1a536ab`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/1a536ab) |
 
 ### Suplantador y desarrollo incremental
 
-*Explicar brevemente.*
+Implementación: [`StubCleaningInventory.java`](P2_AMZ/src/test/java/com/calso/robot/application/usecases/StubCleaningInventory.java) ([`d597f97`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/d597f97)), con sus propias pruebas en `StubCleaningInventoryTest`.
+
+- **Dependencia sustituida.** El caso de uso `ExecuteCleaningProgramUseCase` necesita consultar y descontar existencias, pero el inventario real (infraestructura) todavía no existe. El suplantador ocupa su lugar en las pruebas.
+- **Por qué es posible.** El caso de uso no depende de una clase concreta, sino del puerto `ICleaningInventory` definido en el dominio, y lo recibe por el constructor. Cualquier implementación de esa interfaz sirve, así que en las pruebas se le pasa `StubCleaningInventory` y en producción se le pasará el inventario real sin cambiar el caso de uso.
+- **Cómo ayuda.** Cada prueba fija exactamente las existencias iniciales, ejecuta el caso de uso y comprueba tanto el `ExecutionResult` devuelto como las existencias finales con `available(...)`. Así se ha podido validar la lógica de aplicación (y descubrir D8, D9 y D10) antes de desarrollar el inventario real, sin bases de datos ni otros servicios y con pruebas deterministas.
+- **Comportamiento del suplantador.** Copia las existencias iniciales (rechaza cantidades negativas), devuelve 0 para productos no registrados, descuenta cantidades válidas sin dejar negativos y lanza `IllegalArgumentException` sin modificar nada ante cantidades negativas o superiores a las disponibles. Cada instancia conserva su propio estado. Está solo en `src/test/java`.
 
 ### Indicadores de calidad
 
 | Herramienta | Resultado obtenido | Evidencia |
 | --- | --- | --- |
-| JUnit 5 | | |
-| JaCoCo (instrucciones y ramas) | | |
-| PIT (mutation coverage y test strength) | | |
-| SonarQube (Quality Gate e incidencias) | | |
+| JUnit 5 | **84 pruebas ejecutadas (78 métodos), 0 errores y 0 fallos**, tanto en Eclipse como en la Action de GitHub (`mvn clean verify`). | [junit_final.png](evidencias/junit_final.png) |
+| JaCoCo (instrucciones y ramas) | **Instrucciones: 99 %** (346 de 348; 2 sin cubrir) · **Ramas: 97 %** (43 de 44; 1 sin cubrir). Lo no cubierto se concentra en `com.calso.robot.domain.valueobjects` (`Energy`); el resto de paquetes está al 100 %. | [jacoco.png](evidencias/jacoco.png) |
+| PIT (mutation coverage y test strength) | **Mutation coverage: 90 %** (36 de 40 mutantes eliminados) · **Test strength: 92 %** (36 de 39 mutantes con cobertura) · Line coverage: 98 % (55/56). Quedan 3 mutantes supervivientes y 1 sin cobertura. | [pit.png](evidencias/pit.png) |
+| SonarQube (Quality Gate e incidencias) | **Quality Gate: Passed** (rama `main`). 0 bugs, 0 vulnerabilidades, 0 *security hotspots*, **13 code smells**; cobertura 98,2 % (importada de JaCoCo) y 0,0 % de duplicación. Proyecto: [calso-p2-amz](https://sast.inf.um.es/dashboard?id=calso-p2-amz) | [github_actions.png](evidencias/github_actions.png)<br>[sonarqube.png](evidencias/sonarqube.png) |
 
-**Commit de `main` analizado:** *completar*.
+#### Capturas
 
-**Enlace al vídeo externo (oculto/no listado):** *completar*.
+**JUnit 5 en Eclipse (84/84)**
+
+![Resultado JUnit en Eclipse](evidencias/junit_final.png)
+
+**JaCoCo**
+
+![Informe JaCoCo](evidencias/jacoco.png)
+
+**PIT**
+
+![Informe PIT](evidencias/pit.png)
+
+**GitHub Actions**
+
+![Ejecución de GitHub Actions](evidencias/github_actions.png)
+
+**SonarQube**
+
+![Análisis de SonarQube](evidencias/sonarqube.png)
+
+**Commit de `main` analizado:** [`163912b`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/163912b) (*P2 - Workflow de GitHub Actions para SonarQube*), ejecución #1 de la Action **P2 - Analisis SonarQube** finalizada con éxito.
+
+**Enlace al vídeo externo (oculto/no listado):** *pendiente de publicar*
