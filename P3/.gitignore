@@ -1,0 +1,5 @@
+# Maven / Eclipse (P3)
+target/
+.project
+.classpath
+.settings/
