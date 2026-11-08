@@ -1,0 +1,17 @@
+digraph G {
+  graph [rankdir=TB, fontname="Helvetica", fontsize=16, labelloc=t, nodesep=0.6, ranksep=0.5, pad=0.35, bgcolor="white", label="findYoungestFighter · V(G) = 6"];
+  node  [shape=circle, fontname="Helvetica-Bold", fontsize=15, width=0.5, fixedsize=true, style=filled, fillcolor="#F1F1EE", color="#0E0E0F", penwidth=1.5];
+  edge  [fontname="Helvetica", fontsize=10.5, color="#3A3A3D", fontcolor="#3A3A3D", penwidth=1.2, arrowsize=0.75];
+  F [label="F", shape=doublecircle, width=0.45, fillcolor="#E2E2DE"];
+  1->F [label=" fighters == null", color="#8E1B2C", fontcolor="#8E1B2C"]; 1->2 [label=" no"];
+  2->F [label=" referenceDate == null", color="#8E1B2C", fontcolor="#8E1B2C"]; 2->3 [label=" no"];
+  3->4;
+  4->5 [label=" quedan luchadores"]; 4->8 [label=" no quedan"];
+  5->F [label=" fighter == null", color="#8E1B2C", fontcolor="#8E1B2C"]; 5->6 [label=" no"];
+  6->7 [label=" A || B"]; 6->4 [label=" falso", constraint=false];
+  7->4 [constraint=false];
+  8->F [label=" return"];
+  leyenda [shape=box, style="rounded,filled", fillcolor="white", color="#E2E2DE", fontname="Helvetica", fontsize=10.5, fixedsize=false,
+    label="1: if (fighters == null)\l2: if (referenceDate == null)\l3: youngest = null\l4: for (Fighter fighter : fighters)\l5: if (fighter == null)\l6: if (A || B)\l    A: youngest == null\l    B: fighter.birthDate().isBefore(youngest.birthDate())\l7: youngest = fighter\l8: return Optional.ofNullable(youngest)\l"];
+  { rank=same; 1; leyenda; } 1->leyenda [style=invis];
+}

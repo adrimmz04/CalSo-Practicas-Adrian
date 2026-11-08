@@ -201,27 +201,86 @@ Por el cortocircuito de `&&`, B solo se evalúa cuando A es verdadera.
 
 #### Grafo de flujo
 
-*Pendiente.*
+Numeración de los nodos sobre el código (las comprobaciones de `null` salen por excepción al nodo final F):
+
+```java
+if (fighters == null) throw ...;                                  // 1
+if (referenceDate == null) throw ...;                             // 2
+Fighter youngest = null;                                          // 3
+for (Fighter fighter : fighters) {                                // 4  ¿quedan luchadores?
+    if (fighter == null) throw ...;                               // 5
+    if (youngest == null
+            || fighter.birthDate().isBefore(youngest.birthDate())) { // 6
+        youngest = fighter;                                       // 7
+    }
+}
+return Optional.ofNullable(youngest);                             // 8
+                                                                  // F  fin
+```
+
+El nodo 3 va separado del 4 porque cada vuelta del bucle vuelve al 4, no al 3. La decisión compuesta del nodo 6 se trata como un único nodo para los caminos.
+
+| Desde | Condición | Hacia |
+|---|---|---|
+| 1 | `fighters == null` verdadero / falso | F (excepción) / 2 |
+| 2 | `referenceDate == null` verdadero / falso | F (excepción) / 3 |
+| 3 | — | 4 |
+| 4 | quedan luchadores / no quedan | 5 / 8 |
+| 5 | `fighter == null` verdadero / falso | F (excepción) / 6 |
+| 6 | `A \|\| B` verdadero / falso | 7 / 4 |
+| 7 | — | 4 |
+| 8 | `return` | F |
+
+![Grafo de flujo de findYoungestFighter](evidencias/grafos/findYoungestFighter.png)
 
 #### Complejidad ciclomática
 
 | Fórmula | Cálculo | Resultado |
 |---|---|---|
-| V(G) = aristas − nodos + 2 | | |
-| V(G) = nodos predicado + 1 | | |
-| V(G) = número de regiones | | |
+| V(G) = aristas − nodos + 2 | 13 aristas, 9 nodos (1 a 8 y F): 13 − 9 + 2 | **6** |
+| V(G) = nodos predicado + 1 | Nodos de decisión 1, 2, 4, 5 y 6: 5 + 1 | **6** |
+| V(G) = número de regiones | 5 regiones cerradas + 1 exterior | **6** |
 
 #### Caminos independientes
 
+| Camino | Recorrido | Situación |
+|---|---|---|
+| C1 | 1 → F | lista nula |
+| C2 | 1 → 2 → F | fecha de referencia nula |
+| C3 | 1 → 2 → 3 → 4 → 8 → F | lista vacía |
+| C4 | 1 → 2 → 3 → 4 → 5 → F | lista con un elemento nulo |
+| C5 | 1 → 2 → 3 → 4 → 5 → 6 → 7 → 4 → 8 → F | un solo luchador |
+| C6 | 1 → 2 → 3 → 4 → 5 → 6 → 7 → 4 → 5 → 6 → 4 → 8 → F | dos luchadores; el segundo no sustituye al guardado (arista nueva 6 → 4) |
+
+Los seis caminos son factibles. Recorridos imposibles que conviene señalar: en la primera vuelta el nodo 6 no puede ir al 4, porque `youngest` vale `null` y A es verdadera; y a partir de la segunda vuelta A es siempre falsa, porque `youngest` ya no vuelve a valer `null`.
+
 | Método | Nodo o camino identificado | Datos de entrada y fecha | Resultado esperado según especificación | Nombre del test | Resultado ejecución |
 |---|---|---|---|---|---|
-| | | | | | |
+| `findYoungestFighter` | C1 | `fighters = null`, referencia 2026-11-20 | `NullPointerException` con mensaje `Fighters are required` | | |
+| `findYoungestFighter` | C2 | `[Ana (2000-05-10)]`, `referenceDate = null` | `NullPointerException` con mensaje `Reference date is required` | | |
+| `findYoungestFighter` | C3 | `[]`, referencia 2026-11-20 | `Optional.empty()` | | |
+| `findYoungestFighter` | C4 | `[null]`, referencia 2026-11-20 | `NullPointerException` con mensaje `Null fighter` | | |
+| `findYoungestFighter` | C5 | `[Ana (2000-05-10)]`, referencia 2026-11-20 | `Optional.of(Ana)` | | |
+| `findYoungestFighter` | C6 | `[Ana (2000-05-10), Bea (2005-03-15)]`, referencia 2026-11-20 | `Optional.of(Bea)`: fecha de nacimiento más reciente. Con el código actual devuelve Ana | | |
+
+**Defecto previsto en el diseño:** la comparación usa `isBefore`, que se queda con la fecha de nacimiento más **antigua**, es decir, con el luchador de más edad. La especificación pide el de fecha de nacimiento más reciente. C6 debe revelarlo al ejecutarse.
 
 #### Cobertura de condiciones: decisión `||` sobre el luchador más joven
 
+`A = youngest == null` · `B = fighter.birthDate().isBefore(youngest.birthDate())`
+
+Por el cortocircuito de `||`, B solo se evalúa cuando A es falsa, es decir, desde la segunda vuelta del bucle; así se evita llamar a `youngest.birthDate()` con `youngest` nulo.
+
+| Caso | Vuelta | A | B |
+|---|---|---|---|
+| C5 `[Ana]` | 1.ª | verdadero | no se evalúa |
+| C6 `[Ana, Bea]` | 2.ª (Bea) | falso | falso: 2005-03-15 no es anterior a 2000-05-10 |
+| CC2 `[Bea, Ana]` | 2.ª (Ana) | falso | verdadero: 2000-05-10 es anterior a 2005-03-15 |
+
 | Condición atómica | Caso que evalúa verdadero | Caso que evalúa falso | Casos adicionales | Justificación si no es factible |
 |---|---|---|---|---|
-| | | | | |
+| A: `youngest == null` | C5 | C6 | — | — |
+| B: `fighter.birthDate().isBefore(youngest.birthDate())` | CC2 | C6 | CC2: `[Bea (2005-03-15), Ana (2000-05-10)]`, referencia 2026-11-20. Esperado: `Optional.of(Bea)`. Con el código actual devuelve Ana | B no puede evaluarse con A verdadera: en la primera vuelta lo impide el cortocircuito y desde la segunda A es siempre falsa. No impide cubrir sus dos valores |
 
 ### 2.4. `ReservationDiscountService.calculateBestDiscount`
 
