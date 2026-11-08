@@ -286,21 +286,131 @@ Por el cortocircuito de `||`, B solo se evalúa cuando A es falsa, es decir, des
 
 #### Grafo de flujo
 
-*Pendiente.*
+Numeración de los nodos sobre el código. Las comprobaciones de `null` y los dos `orElseThrow()` salen por excepción al nodo final F. Cada `orElseThrow()` se modela como una decisión (¿el `Optional` está vacío?), porque la especificación indica que forman parte del código que debe analizarse aunque no todas sus ramas excepcionales sean ejecutables. La llamada a `findYoungestFighter` del nodo 3 se trata como una instrucción; sus caminos internos se analizan en el apartado 2.3.
+
+```java
+if (fighters == null) throw ...;                                   // 1
+if (trainingDate == null) throw ...;                               // 2
+int bestPercentage = 0;                                            // 3
+Optional<Fighter> youngest = findYoungestFighter(fighters, trainingDate);  // 3
+if (youngest.isPresent()) {                                        // 4
+    int age = youngest.orElseThrow().ageAt(trainingDate);          // 5
+    if (age < 18) {                                                // 6
+        bestPercentage = 15;                                       // 7
+    }
+}
+for (Fighter fighter : fighters) {                                 // 8  ¿quedan luchadores?
+    if (fighter == null) throw ...;                                // 9
+    Optional<UnemploymentPeriod> period = fighter.unemployment();
+    if (period.isPresent()) {                                      // 10
+        long completeYears = period.orElseThrow().completeYearsAt(trainingDate);  // 11
+        int unemploymentPercentage = 0;
+        if (completeYears >= 3) {                                  // 12
+            unemploymentPercentage = 30;                           // 13
+        } else if (completeYears > 2) {                            // 14
+            unemploymentPercentage = 20;                           // 15
+        } else if (completeYears >= 1) {                           // 16
+            unemploymentPercentage = 10;                           // 17
+        }
+        if (unemploymentPercentage > bestPercentage) {             // 18
+            bestPercentage = unemploymentPercentage;               // 19
+        }
+    }
+}
+return new Discount(bestPercentage);                               // 20
+                                                                   // F  fin
+```
+
+| Desde | Condición | Hacia |
+|---|---|---|
+| 1 | `fighters == null` verdadero / falso | F (excepción) / 2 |
+| 2 | `trainingDate == null` verdadero / falso | F (excepción) / 3 |
+| 3 | — | 4 |
+| 4 | `youngest` presente / vacío | 5 / 8 |
+| 5 | `orElseThrow()` lanza / devuelve el luchador | F (excepción) / 6 |
+| 6 | `age < 18` verdadero / falso | 7 / 8 |
+| 7 | — | 8 |
+| 8 | quedan luchadores / no quedan | 9 / 20 |
+| 9 | `fighter == null` verdadero / falso | F (excepción) / 10 |
+| 10 | `period` presente / vacío | 11 / 8 |
+| 11 | `orElseThrow()` lanza / devuelve el período | F (excepción) / 12 |
+| 12 | `completeYears >= 3` verdadero / falso | 13 / 14 |
+| 13 | — | 18 |
+| 14 | `completeYears > 2` verdadero / falso | 15 / 16 |
+| 15 | — | 18 |
+| 16 | `completeYears >= 1` verdadero / falso | 17 / 18 |
+| 17 | — | 18 |
+| 18 | `unemploymentPercentage > bestPercentage` verdadero / falso | 19 / 8 |
+| 19 | — | 8 |
+| 20 | `return` | F |
+
+![Grafo de flujo de calculateBestDiscount](evidencias/grafos/calculateBestDiscount.png)
+
+En el grafo, las aristas discontinuas son las que no se pueden recorrer.
 
 #### Complejidad ciclomática
 
 | Fórmula | Cálculo | Resultado |
 |---|---|---|
-| V(G) = aristas − nodos + 2 | | |
-| V(G) = nodos predicado + 1 | | |
-| V(G) = número de regiones | | |
+| V(G) = aristas − nodos + 2 | 33 aristas, 21 nodos (1 a 20 y F): 33 − 21 + 2 | **14** |
+| V(G) = nodos predicado + 1 | Nodos de decisión 1, 2, 4, 5, 6, 8, 9, 10, 11, 12, 14, 16 y 18: 13 + 1 | **14** |
+| V(G) = número de regiones | 13 regiones cerradas + 1 exterior | **14** |
+
+Si no se modelaran los dos `orElseThrow()` como decisiones, V(G) sería 12.
 
 #### Caminos independientes
 
+Para abreviar, **P** = 1 → 2 → 3 → 4 → 5 → 6, comienzo común de los caminos que llegan al bucle con al menos un luchador.
+
+| Camino | Recorrido | Situación | Factible |
+|---|---|---|---|
+| C1 | 1 → F | lista nula | Sí |
+| C2 | 1 → 2 → F | fecha de entrenamiento nula | Sí |
+| C3 | 1 → 2 → 3 → 4 → 8 → 20 → F | lista vacía | Sí |
+| C4 | 1 → 2 → 3 → 4 → 5 → F | `youngest.orElseThrow()` lanza | **No** |
+| C5 | P → 8 → 9 → 10 → 8 → 20 → F | adulto sin paro | Sí |
+| C6 | P → 7 → 8 → 9 → 10 → 8 → 20 → F | menor sin paro | Sí |
+| C7 | P → 8 → 9 → F | luchador nulo dentro del bucle | **No** |
+| C8 | P → 8 → 9 → 10 → 11 → F | `period.orElseThrow()` lanza | **No** |
+| C9 | P → 8 → 9 → 10 → 11 → 12 → 13 → 18 → 19 → 8 → 20 → F | adulto con 3 años o más de paro | Sí |
+| C10 | P → 8 → 9 → 10 → 11 → 12 → 14 → 16 → 18 → 8 → 20 → F | adulto con menos de 1 año de paro | Sí |
+| C11 | P → 8 → 9 → 10 → 11 → 12 → 14 → 16 → 17 → 18 → 19 → 8 → 20 → F | adulto con 1 año de paro | Sí |
+| C12 | P → 8 → 9 → 10 → 11 → 12 → 14 → 15 → 18 → 19 → 8 → 20 → F | rama del 20 % | **No** |
+| C13 | P → 7 → 8 → 9 → 10 → 11 → 12 → 14 → 16 → 17 → 18 → 8 → 20 → F | menor con 1 año de paro: el 10 % no supera el 15 % | Sí |
+| C14 | P → 8 → 9 → 10 → 11 → 12 → 13 → 18 → 19 → 8 → 9 → 10 → 11 → 12 → 14 → 16 → 17 → 18 → 8 → 20 → F | dos luchadores en paro: el segundo (10 %) no supera al primero (30 %) | Sí |
+
+C13 y C14 no añaden aristas nuevas, pero son linealmente independientes de los anteriores: combinan las ramas de otra forma y completan la base de 14 caminos.
+
+**Caminos no factibles:**
+
+| Camino | Arista imposible | Justificación |
+|---|---|---|
+| C4 | 5 → F | Al nodo 5 solo se llega si `youngest.isPresent()` es verdadero. Un `Optional` con valor nunca lanza en `orElseThrow()`. |
+| C7 | 9 → F | El nodo 3 llama antes a `findYoungestFighter`, que recorre toda la lista y lanza `NullPointerException("Null fighter")` si encuentra un elemento nulo. Una lista con un nulo nunca llega al nodo 9; la excepción se produce dentro del método auxiliar. |
+| C8 | 11 → F | Al nodo 11 solo se llega si `period.isPresent()` es verdadero, con el mismo razonamiento que en C4. |
+| C12 | 14 → 15 | `completeYears` es entero. Para llegar al nodo 14, el 12 ha descartado los valores mayores o iguales que 3, así que solo llegan 0, 1 o 2, y ninguno es mayor que 2. **Es un defecto:** la especificación asigna un 20 % de 2 a menos de 3 años. |
+
+Fecha de entrenamiento de todos los casos: **2026-11-20**. Ana nació el 1996-01-10 (30 años), Bea el 2009-06-01 (17 años) y Carlos el 1990-02-02. Las fechas de inicio del paro son posteriores a los 16 años de cada luchador.
+
 | Método | Nodo o camino identificado | Datos de entrada y fecha | Resultado esperado según especificación | Nombre del test | Resultado ejecución |
 |---|---|---|---|---|---|
-| | | | | | |
+| `calculateBestDiscount` | C1 | `fighters = null`, 2026-11-20 | `NullPointerException` con mensaje `Fighters are required` | | |
+| `calculateBestDiscount` | C2 | `[Ana]`, `trainingDate = null` | `NullPointerException` con mensaje `Training date is required` | | |
+| `calculateBestDiscount` | C3 | `[]`, 2026-11-20 | `Discount(0)` | | |
+| `calculateBestDiscount` | C5 | `[Ana]` sin paro, 2026-11-20 | `Discount(0)` | | |
+| `calculateBestDiscount` | C6 | `[Bea]` sin paro, 2026-11-20 | `Discount(15)` | | |
+| `calculateBestDiscount` | C9 | `[Ana]` en paro desde 2023-11-20 (3 años justos), 2026-11-20 | `Discount(30)` | | |
+| `calculateBestDiscount` | C10 | `[Ana]` en paro desde 2026-05-01 (0 años), 2026-11-20 | `Discount(0)` | | |
+| `calculateBestDiscount` | C11 | `[Ana]` en paro desde 2025-11-20 (1 año justo), 2026-11-20 | `Discount(10)` | | |
+| `calculateBestDiscount` | C13 | `[Bea]` en paro desde 2025-06-01 (1 año), 2026-11-20 | `Discount(15)`: no se suman, gana el mayor | | |
+| `calculateBestDiscount` | C14 | `[Ana` en paro desde 2023-11-20, `Carlos` en paro desde 2025-11-20`]`, 2026-11-20 | `Discount(30)`: el mayor de 30 y 10 | | |
+| `calculateBestDiscount` | Adicional: 2 años de paro (dato de C12) | `[Ana]` en paro desde 2024-11-20 (2 años justos), 2026-11-20 | `Discount(20)`. Con el código actual da `Discount(10)` | | |
+| `calculateBestDiscount` | Adicional: adulto y menor | `[Ana, Bea]` sin paro, 2026-11-20 | `Discount(15)`: la más joven tiene 17 años. Con el código actual da `Discount(0)`, porque `findYoungestFighter` devuelve a Ana | | |
+
+**Defectos previstos en el diseño:**
+
+- La condición `completeYears > 2` hace inalcanzable el 20 %: un luchador con 2 años completos de paro recibe un 10 %. Lo revela la prueba adicional de 2 años.
+- El descuento juvenil depende de `findYoungestFighter`, que devuelve al luchador de más edad (apartado 2.3). Un equipo con un adulto y un menor pierde el 15 %. No es un defecto de este método: se corrige en `findYoungestFighter`, y al hacerlo esta prueba debe pasar también a verde (regresión).
 
 ### 2.5. Trazabilidad
 

@@ -1,0 +1,29 @@
+digraph G {
+  graph [rankdir=TB, fontname="Helvetica", fontsize=16, labelloc=t, nodesep=0.45, ranksep=0.36, pad=0.35, bgcolor="white", label="calculateBestDiscount · V(G) = 14   (discontinuas = no factibles)"];
+  node  [shape=circle, fontname="Helvetica-Bold", fontsize=15, width=0.5, fixedsize=true, style=filled, fillcolor="#F1F1EE", color="#0E0E0F", penwidth=1.5];
+  edge  [fontname="Helvetica", fontsize=10.5, color="#3A3A3D", fontcolor="#3A3A3D", penwidth=1.2, arrowsize=0.75];
+  F [label="F", shape=doublecircle, width=0.45, fillcolor="#E2E2DE"];
+  1->F [label=" fighters == null", color="#8E1B2C", fontcolor="#8E1B2C"]; 1->2 [label=" no"];
+  2->F [label=" trainingDate == null", color="#8E1B2C", fontcolor="#8E1B2C"]; 2->3 [label=" no"];
+  3->4;
+  4->5 [label=" youngest presente"]; 4->8 [label=" vacío"];
+  5->F [label=" orElseThrow lanza", style=dashed, color="#A9A9AE", fontcolor="#66666B"]; 5->6;
+  6->7 [label=" age < 18"]; 6->8 [label=" no"];
+  7->8;
+  8->9 [label=" quedan luchadores"]; 8->20 [label=" no quedan"];
+  9->F [label=" fighter == null", style=dashed, color="#A9A9AE", fontcolor="#66666B"]; 9->10 [label=" no"];
+  10->11 [label=" period presente"]; 10->8 [label=" vacío", constraint=false];
+  11->F [label=" orElseThrow lanza", style=dashed, color="#A9A9AE", fontcolor="#66666B"]; 11->12;
+  12->13 [label=" >= 3"]; 12->14 [label=" no"];
+  13->18;
+  14->15 [label=" > 2", style=dashed, color="#A9A9AE", fontcolor="#66666B"]; 14->16 [label=" no"];
+  15->18 [style=dashed, color="#A9A9AE", fontcolor="#66666B"];
+  16->17 [label=" >= 1"]; 16->18 [label=" no"];
+  17->18;
+  18->19 [label=" up > best"]; 18->8 [label=" no", constraint=false];
+  19->8 [constraint=false];
+  20->F [label=" return"];
+  leyenda [shape=box, style="rounded,filled", fillcolor="white", color="#E2E2DE", fontname="Helvetica", fontsize=10.5, fixedsize=false,
+    label="1: if (fighters == null)\l2: if (trainingDate == null)\l3: best = 0; youngest = findYoungestFighter(...)\l4: if (youngest.isPresent())\l5: youngest.orElseThrow()\l6: if (age < 18)\l7: best = 15\l8: for (Fighter fighter : fighters)\l9: if (fighter == null)\l10: if (period.isPresent())\l11: period.orElseThrow()\l12: if (completeYears >= 3)\l13: up = 30\l14: else if (completeYears > 2)\l15: up = 20\l16: else if (completeYears >= 1)\l17: up = 10\l18: if (up > best)\l19: best = up\l20: return new Discount(best)\l"];
+  { rank=same; 1; leyenda; } 1->leyenda [style=invis];
+}
