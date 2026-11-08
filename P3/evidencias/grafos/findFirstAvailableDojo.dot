@@ -1,0 +1,21 @@
+digraph G {
+  graph [rankdir=TB, fontname="Helvetica", fontsize=16, labelloc=t, nodesep=0.55, ranksep=0.42, pad=0.35, bgcolor="white", label="findFirstAvailableDojo · V(G) = 10"];
+  node  [shape=circle, fontname="Helvetica-Bold", fontsize=15, width=0.5, fixedsize=true, style=filled, fillcolor="#F1F1EE", color="#0E0E0F", penwidth=1.5];
+  edge  [fontname="Helvetica", fontsize=10.5, color="#3A3A3D", fontcolor="#3A3A3D", penwidth=1.2, arrowsize=0.75];
+  F [label="F", shape=doublecircle, width=0.45, fillcolor="#E2E2DE"];
+  1->F [label=" dojos == null", color="#8E1B2C", fontcolor="#8E1B2C"]; 1->2 [label=" no"];
+  2->F [label=" requiredWeapons == null", color="#8E1B2C", fontcolor="#8E1B2C"]; 2->3 [label=" no"];
+  3->F [label=" reservations == null", color="#8E1B2C", fontcolor="#8E1B2C"]; 3->4 [label=" no"];
+  4->F [label=" trainingDate == null", color="#8E1B2C", fontcolor="#8E1B2C"]; 4->5 [label=" no"];
+  5->6 [label=" quedan dojos"]; 5->13 [label=" no quedan"];
+  6->7 [label=" tiene las armas"]; 6->5 [label=" no las tiene", constraint=false];
+  7->8;
+  8->9 [label=" quedan reservas"]; 8->11 [label=" no quedan"];
+  9->10 [label=" A && B"]; 9->8 [label=" falso", constraint=false];
+  10->11 [label=" break"];
+  11->12 [label=" !occupied"]; 11->5 [label=" occupied", constraint=false];
+  12->F [label=" return dojo"]; 13->F [label=" return empty"];
+  leyenda [shape=box, style="rounded,filled", fillcolor="white", color="#E2E2DE", fontname="Helvetica", fontsize=10.5, fixedsize=false,
+    label="1-4: comprobaciones de null\l5: for (Dojo dojo : dojos)\l6: if (containsAllRequiredWeapons(...))\l7: occupied = false\l8: for (Reservation reservation : reservations)\l9: if (A && B)\l    A: reservation.dojoId().equals(dojo.id())\l    B: !reservation.trainingDate().equals(trainingDate)\l10: occupied = true; break\l11: if (!occupied)\l12: return Optional.of(dojo)\l13: return Optional.empty()\l"];
+  { rank=same; 1; leyenda; } 1->leyenda [style=invis];
+}
