@@ -622,6 +622,19 @@ En los límites de paro no se añade el valor «después» porque coincide con l
 | CO24 | T3 | `/coste?teamId=&dojoId=D-003&trainingDate=2026-11-20` | — | `#error` = `Team id is required` | `testGivenEmptyTeamIdInUrlWhenCalculatingCostThenShowsTeamIdIsRequired` |
 | CO25 | D3 | `/coste?teamId=EQ-002&dojoId=&trainingDate=2026-11-20` | — | `#error` = `Dojo id is required` | `testGivenEmptyDojoIdInUrlWhenCalculatingCostThenShowsDojoIdIsRequired` |
 
+### 3.3. Resultados E2E
+
+Ejecución en Eclipse: *Run As > Maven build…* con *Goals* `clean verify` y *Profile* `e2e` (Chrome 156 sin interfaz, reloj fijo 2026-10-20).
+
+| Ejecución | Resultado | Interpretación |
+|---|---|---|
+| Con las pruebas nuevas y el código original ([`c09e5d5`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/c09e5d5)) | `Tests run: 38, Failures: 0, Errors: 3`; BUILD FAILURE | Los 3 errores son CB11, CO24 y CO25 (identificador vacío en la URL). La página no muestra `#error` y la espera de Selenium se agota (`TimeoutException`): la aplicación muestra los datos de EQ-001 o D-002 en lugar del mensaje exigido. Es el defecto D5. Las otras 35 pruebas pasan |
+| Tras corregir D5 ([`55274ee`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/55274ee)) | `Tests run: 38, Failures: 0, Errors: 0` | Todos los casos de caja negra se comportan según la especificación; ninguna prueba que pasaba ha dejado de pasar |
+
+![Pruebas E2E antes de corregir D5: 3 errores](evidencias/e2e/e2e_paso6_3_fallos.png)
+
+![Pruebas E2E tras corregir D5: todas superadas](evidencias/e2e/e2e_paso7_verde.png)
+
 ---
 
 ## 4. Defectos y correcciones
@@ -632,7 +645,7 @@ En los límites de paro no se añade el valor «después» porque coincide con l
 | D2 | Un dojo con una reserva otro día se considera ocupado, y uno reservado ese mismo día se considera libre | `testGivenDojoD1AndReservationOfD1On20261121When…ThenReturnsD1` (C9) y `testGivenDojosD1AndD2AndReservationOfD1On20261120When…ThenReturnsD2` (CC1) | La condición de ocupación tiene la comparación de fechas negada (`!`) | `&& !reservation.trainingDate().equals(trainingDate)` → `&& reservation.trainingDate().equals(trainingDate)` | Pasan 35 de 39 pruebas del paquete `domain.service`; fallan 4, todas de defectos aún sin corregir (D3, D4). Ninguna prueba que pasaba ha dejado de pasar | [`3aba388`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/3aba388) |
 | D3 | `findYoungestFighter` devuelve al luchador de más edad; el equipo con un adulto y un menor pierde el 15 % | `testGivenAnaBorn20000510ThenBeaBorn20050315When…ThenReturnsBea` (C6), `testGivenBeaBorn20050315ThenAnaBorn20000510When…ThenReturnsBea` (CC2) y `testGivenAnaAged30AndBeaAged17When…ThenReturnsDiscount15` (adicional de 2.4) | Se sustituye al candidato cuando nació **antes** (`isBefore`), es decir, cuando es mayor | `isBefore(youngest.birthDate())` → `isAfter(youngest.birthDate())` | Pasan 38 de 39 pruebas del paquete `domain.service`; fallan 1, todas de defectos aún sin corregir (D4). Ninguna prueba que pasaba ha dejado de pasar | [`e18201a`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/e18201a) |
 | D4 | Un luchador con 2 años completos de paro recibe un 10 % en vez de un 20 % | `testGivenAnaUnemployedSince20241120When…ThenReturnsDiscount20` (adicional de 2.4) | `completeYears > 2` nunca es cierto tras descartar los valores ≥ 3 (camino C12 no factible) | `else if (completeYears > 2)` → `else if (completeYears >= 2)` | Pasan 39 de 39 pruebas del paquete `domain.service`; no falla ninguna. Ninguna prueba que pasaba ha dejado de pasar | [`6704958`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/6704958) |
-| D5 | Con `teamId=` o `dojoId=` vacíos en la URL, `/dojos` y `/coste` muestran los datos de EQ-001 o D-002 en lugar del error `Team id is required` / `Dojo id is required` | `testGivenEmptyTeamIdInUrlWhenSearchingDojosOn20261120ThenShowsTeamIdIsRequired` (CB11), `testGivenEmptyTeamIdInUrlWhenCalculatingCostThenShowsTeamIdIsRequired` (CO24) y `testGivenEmptyDojoIdInUrlWhenCalculatingCostThenShowsDojoIdIsRequired` (CO25) | En `DojoReservationController`, `@RequestParam(defaultValue = …)`: Spring MVC sustituye por el valor por defecto tanto un parámetro ausente como uno **vacío**, así que el caso de uso nunca recibe el identificador vacío | Los parámetros pasan a `required = false` sin `defaultValue`; el valor por defecto se aplica en el controlador solo cuando el parámetro no viene (`null`). Un parámetro vacío llega al caso de uso, que lo rechaza | Pasan las 38 pruebas E2E (antes fallaban 3) y siguen en verde las pruebas unitarias | «P3 - D5 - Validar teamId y dojoId vacíos enviados por URL» |
+| D5 | Con `teamId=` o `dojoId=` vacíos en la URL, `/dojos` y `/coste` muestran los datos de EQ-001 o D-002 en lugar del error `Team id is required` / `Dojo id is required` | `testGivenEmptyTeamIdInUrlWhenSearchingDojosOn20261120ThenShowsTeamIdIsRequired` (CB11), `testGivenEmptyTeamIdInUrlWhenCalculatingCostThenShowsTeamIdIsRequired` (CO24) y `testGivenEmptyDojoIdInUrlWhenCalculatingCostThenShowsDojoIdIsRequired` (CO25) | En `DojoReservationController`, `@RequestParam(defaultValue = …)`: Spring MVC sustituye por el valor por defecto tanto un parámetro ausente como uno **vacío**, así que el caso de uso nunca recibe el identificador vacío | Los parámetros pasan a `required = false` sin `defaultValue`; el valor por defecto se aplica en el controlador solo cuando el parámetro no viene (`null`). Un parámetro vacío llega al caso de uso, que lo rechaza | Pasan las 38 pruebas E2E (antes fallaban 3) y siguen en verde las pruebas unitarias | [`55274ee`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/55274ee) |
 
 ---
 
@@ -662,7 +675,7 @@ Tras las correcciones D1 a D4 (commit [`6704958`](https://github.com/adrimmz04/C
 | Comando | Para qué | Resultado |
 |---|---|---|
 | `mvn clean verify` | Pruebas unitarias y JaCoCo | |
-| `mvn -Pe2e clean verify` | Pruebas Selenium | |
+| `mvn -Pe2e clean verify` | Pruebas Selenium | 38 pruebas E2E (37 de caja negra + la de humo suministrada). Antes de D5 ([`c09e5d5`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/c09e5d5)): 35 superadas y 3 con error, BUILD FAILURE. Tras D5 ([`55274ee`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/55274ee)): 38 superadas |
 | `mvn -Pmutation test pitest:mutationCoverage` | PIT | |
 
 **Entorno:**
