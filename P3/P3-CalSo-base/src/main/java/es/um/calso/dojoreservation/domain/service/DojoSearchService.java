@@ -58,7 +58,7 @@ public final class DojoSearchService {
         }
 
         for (Weapon weapon : required) {
-            if (available.isEmpty()) {
+            if (!available.contains(weapon)) {
                 return false;
             }
         }

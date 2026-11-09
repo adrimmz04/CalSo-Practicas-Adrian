@@ -87,7 +87,7 @@ Las salidas por excepción de los nodos 1 y 2 van directamente al nodo final F.
 | `containsAllRequiredWeapons` | C3 | `available = {Katana}`, `required = {}` | `true` (la especificación lo indica también para `required` vacío) | `testGivenAvailableKatanaAndEmptyRequiredWhenCheckingWeaponsThenReturnsTrue` | Pasa |
 | `containsAllRequiredWeapons` | C4 | `available = {}`, `required = {Katana}` | `false` | `testGivenEmptyAvailableAndRequiredKatanaWhenCheckingWeaponsThenReturnsFalse` | Pasa |
 | `containsAllRequiredWeapons` | C5 (a) | `available = {Katana}`, `required = {Katana}` | `true` | `testGivenAvailableKatanaAndRequiredKatanaWhenCheckingWeaponsThenReturnsTrue` | Pasa |
-| `containsAllRequiredWeapons` | C5 (b) | `available = {Bo}`, `required = {Katana}` | `false`: falta la Katana. Con el código actual recorre C5 y devuelve `true`, porque solo comprueba si `available` está vacío | `testGivenAvailableBoAndRequiredKatanaWhenCheckingWeaponsThenReturnsFalse` | **Falla** (D1) |
+| `containsAllRequiredWeapons` | C5 (b) | `available = {Bo}`, `required = {Katana}` | `false`: falta la Katana. Con el código actual recorre C5 y devuelve `true`, porque solo comprueba si `available` está vacío | `testGivenAvailableBoAndRequiredKatanaWhenCheckingWeaponsThenReturnsFalse` | Falla con el código original (D1). Pasa tras corregirlo |
 
 Fecha: este método no recibe fechas.
 
@@ -521,7 +521,7 @@ Pruebas en [`DojoSearchServiceTest`](P3-CalSo-base/src/test/java/es/um/calso/doj
 
 | ID | Síntoma | Prueba que lo detectó | Causa | Corrección | Regresión posterior | Commit |
 |---|---|---|---|---|---|---|
-| | | | | | | |
+| D1 | `containsAllRequiredWeapons({Bo}, {Katana})` devuelve `true` aunque falta la Katana | `testGivenAvailableBoAndRequiredKatanaWhenCheckingWeaponsThenReturnsFalse` (C5 b) | El bucle comprueba `available.isEmpty()` en lugar de si contiene cada arma requerida | `if (available.isEmpty())` → `if (!available.contains(weapon))` | Pasan 33 de 39 pruebas del paquete `domain.service`; fallan 6, todas de defectos aún sin corregir (D2, D3, D4). Ninguna prueba que pasaba ha dejado de pasar | «P3 - D1 - containsAllRequiredWeapons comprueba cada arma requerida» |
 
 ---
 
