@@ -32,9 +32,11 @@ public class DojoReservationController {
     }
 
     @GetMapping("/dojos")
-    public String dojos(@RequestParam(name = "teamId", defaultValue = "EQ-001") String teamId,
+    public String dojos(@RequestParam(name = "teamId", required = false) String teamIdParam,
             @RequestParam(name = "trainingDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
                     LocalDate trainingDate, Model model) {
+        // Sin parámetro se muestra el equipo por defecto; un parámetro vacío llega al caso de uso para validarse
+        String teamId = teamIdParam == null ? "EQ-001" : teamIdParam;
         LocalDate date = trainingDate == null ? LocalDate.now(clock).plusDays(1) : trainingDate;
         model.addAttribute("teamId", teamId);
         model.addAttribute("trainingDate", date);
@@ -49,10 +51,13 @@ public class DojoReservationController {
     }
 
     @GetMapping("/coste")
-    public String coste(@RequestParam(name = "teamId", defaultValue = "EQ-001") String teamId,
-            @RequestParam(name = "dojoId", defaultValue = "D-002") String dojoId,
+    public String coste(@RequestParam(name = "teamId", required = false) String teamIdParam,
+            @RequestParam(name = "dojoId", required = false) String dojoIdParam,
             @RequestParam(name = "trainingDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
                     LocalDate trainingDate, Model model) {
+        // Sin parámetro se muestran los valores por defecto; un parámetro vacío llega al caso de uso para validarse
+        String teamId = teamIdParam == null ? "EQ-001" : teamIdParam;
+        String dojoId = dojoIdParam == null ? "D-002" : dojoIdParam;
         LocalDate date = trainingDate == null ? LocalDate.now(clock).plusDays(1) : trainingDate;
         model.addAttribute("teamId", teamId);
         model.addAttribute("dojoId", dojoId);
