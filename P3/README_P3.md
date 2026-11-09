@@ -523,10 +523,10 @@ Pruebas en [`DojoSearchServiceTest`](P3-CalSo-base/src/test/java/es/um/calso/doj
 
 | ID | Síntoma | Prueba que lo detectó | Causa | Corrección | Regresión posterior | Commit |
 |---|---|---|---|---|---|---|
-| D1 | `containsAllRequiredWeapons({Bo}, {Katana})` devuelve `true` aunque falta la Katana | `testGivenAvailableBoAndRequiredKatanaWhenCheckingWeaponsThenReturnsFalse` (C5 b) | El bucle comprueba `available.isEmpty()` en lugar de si contiene cada arma requerida | `if (available.isEmpty())` → `if (!available.contains(weapon))` | Pasan 33 de 39 pruebas del paquete `domain.service`; fallan 6, todas de defectos aún sin corregir (D2, D3, D4). Ninguna prueba que pasaba ha dejado de pasar | «P3 - D1 - containsAllRequiredWeapons comprueba cada arma requerida» |
-| D2 | Un dojo con una reserva otro día se considera ocupado, y uno reservado ese mismo día se considera libre | `testGivenDojoD1AndReservationOfD1On20261121When…ThenReturnsD1` (C9) y `testGivenDojosD1AndD2AndReservationOfD1On20261120When…ThenReturnsD2` (CC1) | La condición de ocupación tiene la comparación de fechas negada (`!`) | `&& !reservation.trainingDate().equals(trainingDate)` → `&& reservation.trainingDate().equals(trainingDate)` | Pasan 35 de 39 pruebas del paquete `domain.service`; fallan 4, todas de defectos aún sin corregir (D3, D4). Ninguna prueba que pasaba ha dejado de pasar | «P3 - D2 - findFirstAvailableDojo descarta el dojo reservado ese mismo día» |
-| D3 | `findYoungestFighter` devuelve al luchador de más edad; el equipo con un adulto y un menor pierde el 15 % | `testGivenAnaBorn20000510ThenBeaBorn20050315When…ThenReturnsBea` (C6), `testGivenBeaBorn20050315ThenAnaBorn20000510When…ThenReturnsBea` (CC2) y `testGivenAnaAged30AndBeaAged17When…ThenReturnsDiscount15` (adicional de 2.4) | Se sustituye al candidato cuando nació **antes** (`isBefore`), es decir, cuando es mayor | `isBefore(youngest.birthDate())` → `isAfter(youngest.birthDate())` | Pasan 38 de 39 pruebas del paquete `domain.service`; fallan 1, todas de defectos aún sin corregir (D4). Ninguna prueba que pasaba ha dejado de pasar | «P3 - D3 - findYoungestFighter devuelve el luchador más joven» |
-| D4 | Un luchador con 2 años completos de paro recibe un 10 % en vez de un 20 % | `testGivenAnaUnemployedSince20241120When…ThenReturnsDiscount20` (adicional de 2.4) | `completeYears > 2` nunca es cierto tras descartar los valores ≥ 3 (camino C12 no factible) | `else if (completeYears > 2)` → `else if (completeYears >= 2)` | Pasan 39 de 39 pruebas del paquete `domain.service`; no falla ninguna. Ninguna prueba que pasaba ha dejado de pasar | «P3 - D4 - calculateBestDiscount aplica el 20 % con 2 años de paro» |
+| D1 | `containsAllRequiredWeapons({Bo}, {Katana})` devuelve `true` aunque falta la Katana | `testGivenAvailableBoAndRequiredKatanaWhenCheckingWeaponsThenReturnsFalse` (C5 b) | El bucle comprueba `available.isEmpty()` en lugar de si contiene cada arma requerida | `if (available.isEmpty())` → `if (!available.contains(weapon))` | Pasan 33 de 39 pruebas del paquete `domain.service`; fallan 6, todas de defectos aún sin corregir (D2, D3, D4). Ninguna prueba que pasaba ha dejado de pasar | [`21f394c`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/21f394c) |
+| D2 | Un dojo con una reserva otro día se considera ocupado, y uno reservado ese mismo día se considera libre | `testGivenDojoD1AndReservationOfD1On20261121When…ThenReturnsD1` (C9) y `testGivenDojosD1AndD2AndReservationOfD1On20261120When…ThenReturnsD2` (CC1) | La condición de ocupación tiene la comparación de fechas negada (`!`) | `&& !reservation.trainingDate().equals(trainingDate)` → `&& reservation.trainingDate().equals(trainingDate)` | Pasan 35 de 39 pruebas del paquete `domain.service`; fallan 4, todas de defectos aún sin corregir (D3, D4). Ninguna prueba que pasaba ha dejado de pasar | [`3aba388`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/3aba388) |
+| D3 | `findYoungestFighter` devuelve al luchador de más edad; el equipo con un adulto y un menor pierde el 15 % | `testGivenAnaBorn20000510ThenBeaBorn20050315When…ThenReturnsBea` (C6), `testGivenBeaBorn20050315ThenAnaBorn20000510When…ThenReturnsBea` (CC2) y `testGivenAnaAged30AndBeaAged17When…ThenReturnsDiscount15` (adicional de 2.4) | Se sustituye al candidato cuando nació **antes** (`isBefore`), es decir, cuando es mayor | `isBefore(youngest.birthDate())` → `isAfter(youngest.birthDate())` | Pasan 38 de 39 pruebas del paquete `domain.service`; fallan 1, todas de defectos aún sin corregir (D4). Ninguna prueba que pasaba ha dejado de pasar | [`e18201a`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/e18201a) |
+| D4 | Un luchador con 2 años completos de paro recibe un 10 % en vez de un 20 % | `testGivenAnaUnemployedSince20241120When…ThenReturnsDiscount20` (adicional de 2.4) | `completeYears > 2` nunca es cierto tras descartar los valores ≥ 3 (camino C12 no factible) | `else if (completeYears > 2)` → `else if (completeYears >= 2)` | Pasan 39 de 39 pruebas del paquete `domain.service`; no falla ninguna. Ninguna prueba que pasaba ha dejado de pasar | [`6704958`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/6704958) |
 
 ---
 
@@ -534,10 +534,20 @@ Pruebas en [`DojoSearchServiceTest`](P3-CalSo-base/src/test/java/es/um/calso/doj
 
 | Herramienta | Resultado | Interpretación | Evidencia |
 |---|---|---|---|
-| JUnit 5 | | | |
+| JUnit 5 | Paquete `domain.service`: 39 pruebas (35 de caja blanca + 4 de `ReservationPricingServiceTest`). Con el código original fallan 7; tras corregir D1 a D4 pasan las 39 | Las 7 pruebas que fallaban son exactamente las que el diseño preveía que revelarían defectos. Cada corrección solo hizo pasar a verde las pruebas de su defecto (7 → 6 → 4 → 1 → 0) y ninguna prueba que pasaba dejó de pasar | [Antes](evidencias/junit/junit_paso1_7_fallos.png) · [Después](evidencias/junit/junit_paso5_verde.png) |
 | JaCoCo (líneas y ramas) | | | |
 | PIT (servicios de dominio) | | | |
 | GitHub Actions | | | |
+
+#### Evidencias JUnit (Eclipse, *Run As > JUnit Test* sobre el paquete `es.um.calso.dojoreservation.domain.service`)
+
+Con las pruebas nuevas y el código original (commit [`0cb747b`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/0cb747b)): 39 ejecutadas, 7 fallos.
+
+![JUnit con el código original: 7 fallos](evidencias/junit/junit_paso1_7_fallos.png)
+
+Tras las correcciones D1 a D4 (commit [`6704958`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/6704958)): 39 ejecutadas, 0 fallos.
+
+![JUnit tras corregir D1 a D4: todas en verde](evidencias/junit/junit_paso5_verde.png)
 
 ---
 
