@@ -655,10 +655,31 @@ Ejecución en Eclipse: *Run As > Maven build…* con *Goals* `clean verify` y *P
 
 | Herramienta | Resultado | Interpretación | Evidencia |
 |---|---|---|---|
-| JUnit 5 | Paquete `domain.service`: 39 pruebas (35 de caja blanca + 4 de `ReservationPricingServiceTest`). Con el código original fallan 7; tras corregir D1 a D4 pasan las 39 | Las 7 pruebas que fallaban son exactamente las que el diseño preveía que revelarían defectos. Cada corrección solo hizo pasar a verde las pruebas de su defecto (7 → 6 → 4 → 1 → 0) y ninguna prueba que pasaba dejó de pasar | [Antes](evidencias/junit/junit_paso1_7_fallos.png) · [Después](evidencias/junit/junit_paso5_verde.png) |
-| JaCoCo (líneas y ramas) | | | |
-| PIT (servicios de dominio) | | | |
+| JUnit 5 | Paquete `domain.service`: 39 pruebas (35 de caja blanca + 4 de `ReservationPricingServiceTest`). Con el código original fallan 7; tras corregir D1 a D4 pasan las 39. Con la prueba adicional del análisis PIT, el proyecto tiene 129 pruebas unitarias y pasan todas | Las 7 pruebas que fallaban son exactamente las que el diseño preveía que revelarían defectos. Cada corrección solo hizo pasar a verde las pruebas de su defecto (7 → 6 → 4 → 1 → 0) y ninguna prueba que pasaba dejó de pasar | [Antes](evidencias/junit/junit_paso1_7_fallos.png) · [Después](evidencias/junit/junit_paso5_verde.png) |
+| JaCoCo (líneas y ramas) | Proyecto: 70 % de instrucciones y 80 % de ramas. `domain.service`: 98 % de instrucciones y 98 % de ramas (61 de 62); `DojoSearchService` y `ReservationPricingService` al 100 %. `domain.model` y `persistence` al 100 % | La única rama sin ejecutar de los servicios es `if (fighter == null)` del bucle de `calculateBestDiscount` (líneas 55-56): es el camino **C7, justificado como no factible** en 2.4, porque `findYoungestFighter` lanza antes `Null fighter`. Las ramas de excepción de los `orElseThrow()` (C4 y C8) no aparecen porque están dentro de la biblioteca. Los paquetes `application.usecase`, `infrastructure.web` y `config` salen al 0-46 % porque solo los ejecutan las pruebas Selenium, que JaCoCo no mide en `clean verify` | [General](evidencias/calidad/jacoco_general.png) · [`domain.service`](evidencias/calidad/jacoco_domain_service.png) |
+| PIT (servicios de dominio) | Primera ejecución: 38 mutantes, 36 eliminados, 2 supervivientes, 0 sin cubrir (95 %). Tras añadir una prueba ([`a0e695b`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/a0e695b)): 37 eliminados y 1 superviviente (97 % de *mutation coverage* y de *test strength*) | Ver el análisis de mutantes supervivientes debajo. Una cobertura de líneas del 99 % no garantizaba que las pruebas detectaran todos los cambios: el mutante de la línea 49 se ejecutaba pero ninguna prueba distinguía `< 18` de `<= 18` | [Antes](evidencias/calidad/pit_antes_36_de_38.png) · [Después](evidencias/calidad/pit_despues_37_de_38.png) · [Clase](evidencias/calidad/pit_ReservationDiscountService.png) |
 | GitHub Actions | | | |
+
+#### Análisis de mutantes supervivientes (PIT)
+
+| Línea | Mutación | Estado inicial | Análisis | Decisión |
+|---|---|---|---|---|
+| 49 | `age < 18` → `age <= 18` | Superviviente | Ninguna prueba usaba un luchador con 18 años justos el día del entrenamiento: con 17 o con 30 años, `<` y `<=` dan lo mismo | Se añade `testGivenEvaTurning18On20261120WithoutUnemploymentWhenCalculatingBestDiscountOn20261120ThenReturnsDiscount0` (Eva nace el 2008-11-20; esperado `Discount(0)`). Con ella el mutante queda **eliminado** |
+| 69 | `unemploymentPercentage > bestPercentage` → `>=` | Superviviente | **Mutante equivalente.** Si los dos porcentajes son iguales, asignar `bestPercentage = unemploymentPercentage` deja el mismo valor; el resultado no cambia con ninguna entrada | Se justifica y se mantiene. No puede eliminarse con ninguna prueba |
+
+Los mutantes de los límites de años de paro (`>= 3`, `>= 2`, `>= 1`, líneas 62, 64 y 66) quedan eliminados porque las pruebas usan exactamente 1, 2 y 3 años completos.
+
+#### Evidencias JaCoCo y PIT
+
+![JaCoCo: resumen del proyecto](evidencias/calidad/jacoco_general.png)
+
+![JaCoCo: paquete domain.service](evidencias/calidad/jacoco_domain_service.png)
+
+![PIT antes de la prueba adicional: 36 de 38](evidencias/calidad/pit_antes_36_de_38.png)
+
+![PIT después de la prueba adicional: 37 de 38](evidencias/calidad/pit_despues_37_de_38.png)
+
+![PIT: calculateBestDiscount, con la línea 69 (mutante equivalente) en rojo y la 56 (camino C7 no factible) sin cubrir](evidencias/calidad/pit_ReservationDiscountService.png)
 
 #### Evidencias JUnit (Eclipse, *Run As > JUnit Test* sobre el paquete `es.um.calso.dojoreservation.domain.service`)
 
@@ -676,9 +697,9 @@ Tras las correcciones D1 a D4 (commit [`6704958`](https://github.com/adrimmz04/C
 
 | Comando | Para qué | Resultado |
 |---|---|---|
-| `mvn clean verify` | Pruebas unitarias y JaCoCo | |
+| `mvn clean verify` | Pruebas unitarias y JaCoCo | 129 pruebas unitarias superadas (0 fallos); informe en `target/site/jacoco/`; BUILD SUCCESS |
 | `mvn -Pe2e clean verify` | Pruebas Selenium | 38 pruebas E2E (37 de caja negra + la de humo suministrada). Antes de D5 ([`c09e5d5`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/c09e5d5)): 35 superadas y 3 con error, BUILD FAILURE. Tras D5 ([`55274ee`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/55274ee)): 38 superadas |
-| `mvn -Pmutation test pitest:mutationCoverage` | PIT | |
+| `mvn -Pmutation test pitest:mutationCoverage` | PIT | 38 mutantes en `domain.service`: 37 eliminados y 1 superviviente equivalente (97 %); informe en `target/pit-reports/` |
 
 **Entorno:**
 
