@@ -212,4 +212,13 @@ class ReservationDiscountServiceTest {
         Discount result = service.calculateBestDiscount(fighters, TRAINING_DATE);
         assertEquals(new Discount(15), result);
     }
+
+    // Adicional (análisis PIT): el más joven cumple 18 años justo el día del entrenamiento
+    // Mata el mutante que cambia age < 18 por age <= 18
+    @Test
+    void testGivenEvaTurning18On20261120WithoutUnemploymentWhenCalculatingBestDiscountOn20261120ThenReturnsDiscount0() {
+        List<Fighter> fighters = List.of(fighter("Eva", LocalDate.of(2008, 11, 20)));
+        Discount result = service.calculateBestDiscount(fighters, TRAINING_DATE);
+        assertEquals(new Discount(0), result);
+    }
 }

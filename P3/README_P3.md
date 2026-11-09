@@ -410,6 +410,7 @@ Fecha de entrenamiento de todos los casos: **2026-11-20**. Ana nació el 1996-01
 | `calculateBestDiscount` | C14 | `[Ana` en paro desde 2023-11-20, `Carlos` en paro desde 2025-11-20`]`, 2026-11-20 | `Discount(30)`: el mayor de 30 y 10 | `testGivenAnaUnemployed3YearsThenCarlosUnemployed1YearWhenCalculatingBestDiscountOn20261120ThenReturnsDiscount30` | Pasa |
 | `calculateBestDiscount` | Adicional: 2 años de paro (dato de C12) | `[Ana]` en paro desde 2024-11-20 (2 años justos), 2026-11-20 | `Discount(20)`. Con el código actual da `Discount(10)` | `testGivenAnaUnemployedSince20241120WhenCalculatingBestDiscountOn20261120ThenReturnsDiscount20` | Falla con el código original (D4). Pasa tras corregirlo |
 | `calculateBestDiscount` | Adicional: adulto y menor | `[Ana, Bea]` sin paro, 2026-11-20 | `Discount(15)`: la más joven tiene 17 años. Con el código actual da `Discount(0)`, porque `findYoungestFighter` devuelve a Ana | `testGivenAnaAged30AndBeaAged17WhenCalculatingBestDiscountOn20261120ThenReturnsDiscount15` | Falla con el código original (D3). Pasa tras corregirlo |
+| `calculateBestDiscount` | Adicional (análisis PIT): límite de 18 años | `[Eva (2008-11-20)]` sin paro, 2026-11-20: cumple 18 años ese día | `Discount(0)`: con 18 años no hay bonificación juvenil | `testGivenEvaTurning18On20261120WithoutUnemploymentWhenCalculatingBestDiscountOn20261120ThenReturnsDiscount0` | Pasa |
 
 **Defectos previstos en el diseño:**
 
@@ -459,6 +460,7 @@ Pruebas en [`DojoSearchServiceTest`](P3-CalSo-base/src/test/java/es/um/calso/doj
 | `calculateBestDiscount` | C14 | `testGivenAnaUnemployed3YearsThenCarlosUnemployed1YearWhenCalculatingBestDiscountOn20261120ThenReturnsDiscount30` |
 | `calculateBestDiscount` | Adicional: 2 años de paro (dato de C12) | `testGivenAnaUnemployedSince20241120WhenCalculatingBestDiscountOn20261120ThenReturnsDiscount20` |
 | `calculateBestDiscount` | Adicional: adulto y menor | `testGivenAnaAged30AndBeaAged17WhenCalculatingBestDiscountOn20261120ThenReturnsDiscount15` |
+| `calculateBestDiscount` | Adicional (análisis PIT): límite de 18 años | `testGivenEvaTurning18On20261120WithoutUnemploymentWhenCalculatingBestDiscountOn20261120ThenReturnsDiscount0` |
 
 #### Condición atómica / valor → prueba
 
