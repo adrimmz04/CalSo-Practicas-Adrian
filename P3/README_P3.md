@@ -12,7 +12,7 @@
 
 Al tratarse de un grupo de un único integrante, todo el trabajo se ha realizado en la rama `main`.
 
-**Uso de herramientas de IA:** se ha utilizado Claude (IA de Anthropic) como herramienta de apoyo: para resolver dudas durante el diseño de caja blanca (grafos, complejidad ciclomática, caminos, datos de prueba y cobertura de condiciones) y para generar, a partir de ese diseño, el código de las pruebas JUnit de los apartados 2.1 a 2.4 y de las correcciones D1 a D4. El autor ha revisado y ejecutado todo el código en Eclipse.
+**Uso de herramientas de IA:** se ha utilizado Claude (IA de Anthropic) como herramienta de apoyo: para resolver dudas durante el diseño de caja blanca (grafos, complejidad ciclomática, caminos, datos de prueba y cobertura de condiciones); para generar, a partir de ese diseño, el código de las pruebas JUnit de los apartados 2.1 a 2.4 y de las correcciones D1 a D4; y para elaborar el diseño de caja negra del apartado 3 (clases, límites y casos), las pruebas Selenium y la corrección D5. El autor ha revisado y ejecutado todo el código en Eclipse.
 
 Módulo Maven: [`P3-CalSo-base/`](P3-CalSo-base/) · Workflow: [`.github/workflows/p3-quality.yml`](../.github/workflows/p3-quality.yml)
 
@@ -477,25 +477,73 @@ Pruebas en [`DojoSearchServiceTest`](P3-CalSo-base/src/test/java/es/um/calso/doj
 
 ## 3. Caja negra
 
+Pruebas Selenium en [`DojoSearchE2ETest`](P3-CalSo-base/src/test/java/es/um/calso/dojoreservation/infrastructure/e2e/DojoSearchE2ETest.java) y [`ReservationCostE2ETest`](P3-CalSo-base/src/test/java/es/um/calso/dojoreservation/infrastructure/e2e/ReservationCostE2ETest.java), con la clase de apoyo suministrada `BrowserE2ESupport`.
+
+**Estado inicial común a todos los casos:**
+- **Reloj del perfil `e2e`:** fijo en **2026-10-20** (Europe/Madrid). Hoy es 2026-10-20 y el primer día válido es el 2026-10-21.
+- **Catálogo `InMemoryCatalog`, sin modificar:**
+
+| Elemento | Datos relevantes |
+|---|---|
+| EQ-001 | Requiere Katana y Bokken. Hana nace el 2009-11-20 (menor hasta el 2027-11-19); Akira está en paro desde el 2024-11-20 |
+| EQ-002 | Requiere Bo. Cinco adultos sin paro |
+| EQ-003 | Requiere Bo. Nora nace el 2009-11-20: cumple 18 años el 2027-11-20 |
+| EQ-004 | Requiere Bo. Izan está en paro desde el 2025-11-20: 1 año el 2026-11-20 y 2 años el 2027-11-20 |
+| EQ-005 | Requiere Bo. Lea está en paro desde el 2024-11-20: 3 años el 2027-11-20 |
+| Dojos, en orden de selección | D-001 (40,00 €; Katana y Bokken), D-002 (50,00 €; Katana, Bokken y Bo), D-003 (35,00 €; Bo) |
+| Reservas | D-001 el 2026-11-20 y el 2027-11-20 |
+
+Los desplegables solo ofrecen identificadores conocidos. Los identificadores vacíos, en blanco o inexistentes, y las fechas imposibles, se prueban abriendo la URL con parámetros. Así se comprueba la validación del servidor.
+
 ### 3.1. Búsqueda de dojos (`/dojos`)
 
 #### Clases de equivalencia
 
 | Código de clase | Variable | Condición de pertenencia | Válida / inválida | Comportamiento exigido |
 |---|---|---|---|---|
-| | | | | |
+| T1 | `teamId` | Identificador de un equipo existente (EQ-001 a EQ-005) | Válida | Se evalúan los dojos para ese equipo |
+| T2 | `teamId` | En blanco (solo espacios) | Inválida | `Team id is required` |
+| T3 | `teamId` | Vacío (`teamId=`) | Inválida | `Team id is required` |
+| T4 | `teamId` | Con formato de identificador, pero no existe (EQ-999) | Inválida | `Team does not exist` |
+| F1 | `trainingDate` | Posterior a la fecha actual (después del 2026-10-20) | Válida | Se realiza la búsqueda |
+| F2 | `trainingDate` | Igual a la fecha actual (2026-10-20) | Inválida | `Training date must be in the future` |
+| F3 | `trainingDate` | Anterior a la fecha actual | Inválida | `Training date must be in the future` |
+| F4 | `trainingDate` | Fecha imposible enviada por HTTP (2026-13-40) | Inválida | Spring MVC la rechaza antes de ejecutar el controlador. No se presupone el mensaje de fecha no futura |
+| R1 | Estado | El primer dojo de la lista es compatible y está libre | Válida | Se selecciona ese dojo |
+| R2 | Estado | El primer dojo compatible está reservado para esa fecha | Válida | Se marca como ocupado y la búsqueda continúa con el siguiente compatible |
+| R3 | Estado | La reserva del dojo compatible es de otro día | Válida | La reserva no bloquea: se selecciona ese dojo |
+| R4 | Estado | El primer dojo de la lista no tiene todas las armas requeridas | Válida | Se descarta y se selecciona el siguiente compatible y libre |
+| R5 | Estado | Ningún dojo es compatible y libre | Válida | Mensaje de ausencia de dojo (`#no-dojo`) |
+
+**R5 no se puede producir con el catálogo suministrado.** EQ-001 es compatible con D-001 y D-002, pero solo D-001 tiene reservas. Los equipos que requieren Bo son compatibles con D-002 y D-003, que no tienen ninguna. Como los datos del catálogo no deben alterarse, R5 queda identificada pero sin caso E2E.
 
 #### Valores límite
 
 | Variable | Valor del límite | Valor elegido | Expectativas |
 |---|---|---|---|
-| | | | |
+| `trainingDate` frente al reloj | 2026-10-20 (hoy) | 2026-10-19 (antes) | `Training date must be in the future` |
+| | | 2026-10-20 (en) | `Training date must be in the future` |
+| | | 2026-10-21 (después) | Búsqueda válida: EQ-001 obtiene D-001 |
+| `trainingDate` frente a la reserva de D-001 | 2026-11-20 | 2026-11-19 (antes) | D-001 libre y seleccionado |
+| | | 2026-11-20 (en) | D-001 ocupado; se selecciona D-002 |
+| | | 2026-11-21 (después) | D-001 libre y seleccionado |
 
 #### Casos de prueba
 
 | ID del caso | Clases cubiertas | Equipo/dojo/fecha o URL concreta | Estado inicial | Resultado único esperado | Nombre prueba |
 |---|---|---|---|---|---|
-| | | | | | |
+| CB1 | T1, F1, R1; límite «después» del reloj | EQ-001, 2026-10-21 | Reloj 2026-10-20, catálogo | `#dojo-id` = `D-001` | `testGivenTeamEq001AndTomorrow20261021WhenSearchingDojosThenSelectsD001` |
+| CB2 | F2; límite «en» del reloj | EQ-001, 2026-10-20 | Reloj 2026-10-20 | `#error` = `Training date must be in the future` | `testGivenTeamEq001AndToday20261020WhenSearchingDojosThenShowsTrainingDateMustBeInTheFuture` |
+| CB3 | F3; límite «antes» del reloj | EQ-001, 2026-10-19 | Reloj 2026-10-20 | `#error` = `Training date must be in the future` | `testGivenTeamEq001AndYesterday20261019WhenSearchingDojosThenShowsTrainingDateMustBeInTheFuture` |
+| CB4 | T1, F1, R2; límite «en» de la reserva | EQ-001, 2026-11-20 | Reserva de D-001 el 2026-11-20 | `#dojo-id` = `D-002` | `testGivenTeamEq001AndD001Reserved20261120WhenSearchingDojosOn20261120ThenSelectsD002` |
+| CB5 | R2 (misma entrada que CB4, otra salida) | EQ-001, 2026-11-20 | Reserva de D-001 el 2026-11-20 | La fila `data-dojo-id='D-001'` indica `Ocupado` | `testGivenTeamEq001AndD001Reserved20261120WhenSearchingDojosOn20261120ThenD001RowShowsOcupado` |
+| CB6 | R3; límite «antes» de la reserva | EQ-001, 2026-11-19 | Reserva de D-001 el 2026-11-20 | `#dojo-id` = `D-001` | `testGivenTeamEq001AndD001Reserved20261120WhenSearchingDojosOn20261119ThenSelectsD001` |
+| CB7 | R3; límite «después» de la reserva | EQ-001, 2026-11-21 | Reserva de D-001 el 2026-11-20 | `#dojo-id` = `D-001` | `testGivenTeamEq001AndD001Reserved20261120WhenSearchingDojosOn20261121ThenSelectsD001` |
+| CB8 | T1, F1, R4 | EQ-002, 2026-11-20 | D-001 no tiene Bo | `#dojo-id` = `D-002` | `testGivenTeamEq002RequiringBoWhenSearchingDojosOn20261120ThenSelectsD002` |
+| CB9 | T4 | `/dojos?teamId=EQ-999&trainingDate=2026-11-20` | Catálogo sin EQ-999 | `#error` = `Team does not exist` | `testGivenUnknownTeamEq999InUrlWhenSearchingDojosOn20261120ThenShowsTeamDoesNotExist` |
+| CB10 | T2 | `/dojos?teamId=%20&trainingDate=2026-11-20` | — | `#error` = `Team id is required` | `testGivenBlankTeamIdInUrlWhenSearchingDojosOn20261120ThenShowsTeamIdIsRequired` |
+| CB11 | T3 | `/dojos?teamId=&trainingDate=2026-11-20` | — | `#error` = `Team id is required` | `testGivenEmptyTeamIdInUrlWhenSearchingDojosOn20261120ThenShowsTeamIdIsRequired` |
+| CB12 | F4 | `/dojos?teamId=EQ-001&trainingDate=2026-13-40` | — | No se muestra la pantalla de búsqueda (no existe `#search`): la petición se rechaza antes del controlador | `testGivenImpossibleDate20261340InUrlWhenSearchingDojosThenSearchScreenIsNotShown` |
 
 ### 3.2. Coste y bonificaciones (`/coste`)
 
@@ -503,19 +551,76 @@ Pruebas en [`DojoSearchServiceTest`](P3-CalSo-base/src/test/java/es/um/calso/doj
 
 | Código de clase | Variable | Condición de pertenencia | Válida / inválida | Comportamiento exigido |
 |---|---|---|---|---|
-| | | | | |
+| T1 | `teamId` | Equipo existente | Válida | Se calcula el coste |
+| T2 | `teamId` | En blanco (solo espacios) | Inválida | `Team id is required` |
+| T3 | `teamId` | Vacío (`teamId=`) | Inválida | `Team id is required` |
+| T4 | `teamId` | No existe (EQ-999) | Inválida | `Team does not exist` |
+| D1 | `dojoId` | Dojo existente (D-001 a D-003) | Válida | Precio base del dojo |
+| D2 | `dojoId` | En blanco (solo espacios) | Inválida | `Dojo id is required` |
+| D3 | `dojoId` | Vacío (`dojoId=`) | Inválida | `Dojo id is required` |
+| D4 | `dojoId` | No existe (D-999) | Inválida | `Dojo does not exist` |
+| F1 | `trainingDate` | Posterior a la fecha actual | Válida | Se calcula el coste |
+| F2 | `trainingDate` | Igual a la fecha actual (2026-10-20) | Inválida | `Training date must be in the future` |
+| F3 | `trainingDate` | Anterior a la fecha actual | Inválida | `Training date must be in the future` |
+| A1 | Armas requeridas por el equipo | 1 arma distinta | Válida | Suplemento de 5,00 € |
+| A2 | Armas requeridas por el equipo | 2 armas distintas | Válida | Suplemento de 10,00 € |
+| B0 | Bonificación | Ningún menor de 18 años ni ningún luchador en paro | Válida | 0 % |
+| B1 | Bonificación | El más joven tiene menos de 18 años y no hay paro | Válida | 15 % |
+| B2 | Bonificación | Paro de menos de 1 año completo | Válida | 0 % |
+| B3 | Bonificación | Paro de 1 a menos de 2 años | Válida | 10 % |
+| B4 | Bonificación | Paro de 2 a menos de 3 años | Válida | 20 % |
+| B5 | Bonificación | Paro de 3 años o más | Válida | 30 % |
+| B6 | Bonificación | Concurren juventud y paro | Válida | Solo el porcentaje mayor; nunca la suma |
+| R1 | Estado | El dojo tiene una reserva en la fecha pedida | Válida | El presupuesto se calcula igual: calcular un coste no es reservar |
 
 #### Valores límite
 
 | Variable | Valor del límite | Valor elegido | Expectativas |
 |---|---|---|---|
-| | | | |
+| `trainingDate` frente al reloj | 2026-10-20 (hoy) | 2026-10-19 (antes) | `Training date must be in the future` |
+| | | 2026-10-20 (en) | `Training date must be in the future` |
+| | | 2026-10-21 (después) | Coste calculado |
+| Edad del más joven (EQ-003) | 18 años: el 2027-11-20 | 2027-11-19 (antes) | 15 % |
+| | | 2027-11-20 (en) | 0 % |
+| | | 2027-11-21 (después) | 0 % |
+| Años de paro (EQ-004) | 1 año: el 2026-11-20 | 2026-11-19 (antes) | 0 % |
+| | | 2026-11-20 (en) | 10 % |
+| Años de paro (EQ-004) | 2 años: el 2027-11-20 | 2027-11-19 (antes) | 10 % |
+| | | 2027-11-20 (en) | 20 % |
+| Años de paro (EQ-005) | 3 años: el 2027-11-20 | 2027-11-19 (antes) | 20 % |
+| | | 2027-11-20 (en) | 30 % |
+
+En los límites de paro no se añade el valor «después» porque coincide con la clase del valor «en». En cambio, el de 18 años sí se añade, porque es la frontera de la regla de juventud.
 
 #### Casos de prueba
 
 | ID del caso | Clases cubiertas | Equipo/dojo/fecha o URL concreta | Estado inicial | Resultado único esperado | Nombre prueba |
 |---|---|---|---|---|---|
-| | | | | | |
+| CO1 | T1, D1, F1, A1 | EQ-002, D-001, 2026-10-21 | Cinco adultos sin paro | `#weapons-price` = `5.00` | `testGivenTeamEq002RequiringOneWeaponAndDojoD001WhenCalculatingCostOn20261021ThenWeaponSupplementIs500` |
+| CO2 | A2 | EQ-001, D-001, 2026-10-21 | Hana (menor), Akira en paro desde 2024-11-20 | `#weapons-price` = `10.00` | `testGivenTeamEq001RequiringTwoWeaponsAndDojoD001WhenCalculatingCostOn20261021ThenWeaponSupplementIs1000` |
+| CO3 | T1, D1, F1, A1 | EQ-002, D-002, 2026-10-21 | Cinco adultos sin paro | `#subtotal` = `55.00` (50,00 + 5,00) | `testGivenTeamEq002AndDojoD002WhenCalculatingCostOn20261021ThenSubtotalIs5500` |
+| CO4 | B0; límite «después» del reloj | EQ-002, D-003, 2026-10-21 | Cinco adultos sin paro | `#final-price` = `40.00` (40,00 sin bonificación) | `testGivenTeamEq002WithoutDiscountAndDojoD003WhenCalculatingCostOn20261021ThenFinalPriceIs4000` |
+| CO5 | B1; límite «antes» de 18 años | EQ-003, D-003, 2027-11-19 | Nora nace el 2009-11-20 | `#discount` = `15` | `testGivenTeamEq003WithFighterAged17WhenCalculatingCostOn20271119ThenDiscountIs15` |
+| CO6 | B0; límite «en» de 18 años | EQ-003, D-003, 2027-11-20 | Nora nace el 2009-11-20 | `#discount` = `0` | `testGivenTeamEq003WithFighterTurning18WhenCalculatingCostOn20271120ThenDiscountIs0` |
+| CO7 | B0; límite «después» de 18 años | EQ-003, D-003, 2027-11-21 | Nora nace el 2009-11-20 | `#discount` = `0` | `testGivenTeamEq003WithFighterAged18WhenCalculatingCostOn20271121ThenDiscountIs0` |
+| CO8 | B2; límite «antes» de 1 año | EQ-004, D-003, 2026-11-19 | Izan en paro desde 2025-11-20 | `#discount` = `0` | `testGivenTeamEq004UnemployedLessThanOneYearWhenCalculatingCostOn20261119ThenDiscountIs0` |
+| CO9 | B3; límite «en» de 1 año | EQ-004, D-003, 2026-11-20 | Izan en paro desde 2025-11-20 | `#discount` = `10` | `testGivenTeamEq004UnemployedOneYearWhenCalculatingCostOn20261120ThenDiscountIs10` |
+| CO10 | B3; límite «antes» de 2 años | EQ-004, D-003, 2027-11-19 | Izan en paro desde 2025-11-20 | `#discount` = `10` | `testGivenTeamEq004UnemployedAlmostTwoYearsWhenCalculatingCostOn20271119ThenDiscountIs10` |
+| CO11 | B4; límite «en» de 2 años | EQ-004, D-003, 2027-11-20 | Izan en paro desde 2025-11-20 | `#discount` = `20` | `testGivenTeamEq004UnemployedTwoYearsWhenCalculatingCostOn20271120ThenDiscountIs20` |
+| CO12 | B4; límite «antes» de 3 años | EQ-005, D-003, 2027-11-19 | Lea en paro desde 2024-11-20 | `#discount` = `20` | `testGivenTeamEq005UnemployedAlmostThreeYearsWhenCalculatingCostOn20271119ThenDiscountIs20` |
+| CO13 | B5; límite «en» de 3 años | EQ-005, D-003, 2027-11-20 | Lea en paro desde 2024-11-20 | `#discount` = `30` | `testGivenTeamEq005UnemployedThreeYearsWhenCalculatingCostOn20271120ThenDiscountIs30` |
+| CO14 | B6 (15 % frente a 10 %) | EQ-001, D-002, 2026-10-21 | Hana (menor), Akira en paro desde 2024-11-20 | `#discount` = `15` | `testGivenTeamEq001WithYouth15AndUnemployment10WhenCalculatingCostOn20261021ThenDiscountIs15` |
+| CO15 | B6 (20 % frente a 15 %) | EQ-001, D-002, 2026-11-20 | Hana (menor), Akira en paro desde 2024-11-20 | `#discount` = `20`, no 35 | `testGivenTeamEq001WithUnemployment20AndYouth15WhenCalculatingCostOn20261120ThenDiscountIs20` |
+| CO16 | B6; precio final | EQ-001, D-002, 2026-11-20 | Hana (menor), Akira en paro desde 2024-11-20 | `#final-price` = `48.00` (60,00 − 20 %) | `testGivenTeamEq001AndDojoD002WithDiscount20WhenCalculatingCostOn20261120ThenFinalPriceIs4800` |
+| CO17 | R1 | EQ-001, D-001, 2026-11-20 | Hana (menor), Akira en paro desde 2024-11-20; D-001 reservado el 2026-11-20 | `#final-price` = `40.00` (50,00 − 20 %) | `testGivenTeamEq001AndDojoD001ReservedOn20261120WhenCalculatingCostOn20261120ThenFinalPriceIs4000` |
+| CO18 | F2; límite «en» del reloj | EQ-002, D-003, 2026-10-20 | Reloj 2026-10-20 | `#error` = `Training date must be in the future` | `testGivenTeamEq002AndDojoD003AndToday20261020WhenCalculatingCostThenShowsTrainingDateMustBeInTheFuture` |
+| CO19 | F3; límite «antes» del reloj | EQ-002, D-003, 2026-10-19 | Reloj 2026-10-20 | `#error` = `Training date must be in the future` | `testGivenTeamEq002AndDojoD003AndYesterday20261019WhenCalculatingCostThenShowsTrainingDateMustBeInTheFuture` |
+| CO20 | T4 | `/coste?teamId=EQ-999&dojoId=D-003&trainingDate=2026-11-20` | Catálogo sin EQ-999 | `#error` = `Team does not exist` | `testGivenUnknownTeamEq999InUrlWhenCalculatingCostThenShowsTeamDoesNotExist` |
+| CO21 | D4 | `/coste?teamId=EQ-002&dojoId=D-999&trainingDate=2026-11-20` | Catálogo sin D-999 | `#error` = `Dojo does not exist` | `testGivenUnknownDojoD999InUrlWhenCalculatingCostThenShowsDojoDoesNotExist` |
+| CO22 | T2 | `/coste?teamId=%20&dojoId=D-003&trainingDate=2026-11-20` | — | `#error` = `Team id is required` | `testGivenBlankTeamIdInUrlWhenCalculatingCostThenShowsTeamIdIsRequired` |
+| CO23 | D2 | `/coste?teamId=EQ-002&dojoId=%20&trainingDate=2026-11-20` | — | `#error` = `Dojo id is required` | `testGivenBlankDojoIdInUrlWhenCalculatingCostThenShowsDojoIdIsRequired` |
+| CO24 | T3 | `/coste?teamId=&dojoId=D-003&trainingDate=2026-11-20` | — | `#error` = `Team id is required` | `testGivenEmptyTeamIdInUrlWhenCalculatingCostThenShowsTeamIdIsRequired` |
+| CO25 | D3 | `/coste?teamId=EQ-002&dojoId=&trainingDate=2026-11-20` | — | `#error` = `Dojo id is required` | `testGivenEmptyDojoIdInUrlWhenCalculatingCostThenShowsDojoIdIsRequired` |
 
 ---
 
