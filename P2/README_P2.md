@@ -592,4 +592,4 @@ Implementación: [`StubCleaningInventory.java`](P2_AMZ/src/test/java/com/calso/r
 
 **Commit de `main` analizado:** [`163912b`](https://github.com/adrimmz04/CalSo-Practicas-Adrian/commit/163912b) (*P2 - Workflow de GitHub Actions para SonarQube*), ejecución #1 de la Action **P2 - Analisis SonarQube** finalizada con éxito.
 
-**Enlace al vídeo externo (oculto/no listado):** *pendiente de publicar*
+**Enlace al vídeo externo (oculto/no listado):** [https://youtu.be/P4uHUNUVkUc](https://youtu.be/P4uHUNUVkUc)
