@@ -725,8 +725,15 @@ Java y Maven no están instalados aparte en el sistema (`java -version` no se re
 
 ## 7. Vídeo de síntesis
 
-**Enlace (oculto/no listado):** *pendiente.*
+**Enlace (oculto/no listado):** [https://youtu.be/OxzrJ11AJTw](https://youtu.be/OxzrJ11AJTw)
 
 | Parte | Resultado concreto que se explica |
 |---|---|
-| | |
+| 1. Presentación | Alcance de la práctica y de los tres resultados que se explican |
+| 2. Caja blanca: grafo de `containsAllRequiredWeapons` | V(G) = 5 por las tres fórmulas; al dar datos al camino del bucle aparece que el código no comprueba cada arma |
+| 3. Caja blanca: defecto D1 en Eclipse | Con la condición original, la prueba Bo/Katana falla (se esperaba `false` y da `true`); con `!available.contains(weapon)` pasa y la regresión no rompe ninguna otra |
+| 4. Caja negra: búsqueda en `/dojos` | Valor límite de la reserva de D-001 el 2026-11-20: ese día sale *Ocupado* y se elige D-002; el día anterior y el siguiente se elige D-001 |
+| 5. Caja negra: defecto D5 | Con `teamId=` vacío en la URL la aplicación mostraba EQ-001 en vez de `Team id is required`, por el `defaultValue` del controlador; 3 errores E2E antes de corregirlo y 38 de 38 después |
+| 6. JaCoCo | 98 % de ramas en `domain.service`; la única rama sin ejecutar (`fighter == null` en el bucle de `calculateBestDiscount`) es el camino C7, justificado como no factible en el diseño |
+| 7. PIT | De 36/38 a 37/38: el mutante `age < 18` → `<= 18` sobrevivía por falta de un caso de 18 años justos y se elimina con la prueba de Eva; el de la línea 69 es equivalente |
+| 8. GitHub Actions | Workflow `p3-quality.yml` en verde, con los informes de JUnit, JaCoCo y PIT publicados como artefactos |
