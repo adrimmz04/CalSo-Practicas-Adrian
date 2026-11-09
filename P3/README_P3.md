@@ -12,6 +12,8 @@
 
 Al tratarse de un grupo de un único integrante, todo el trabajo se ha realizado en la rama `main`.
 
+**Uso de herramientas de IA:** se ha utilizado Claude (IA de Anthropic) como herramienta de apoyo: para resolver dudas durante el diseño de caja blanca (grafos, complejidad ciclomática, caminos, datos de prueba y cobertura de condiciones) y para generar, a partir de ese diseño, el código de las pruebas JUnit de los apartados 2.1 a 2.4 y de las correcciones D1 a D4. El autor ha revisado y ejecutado todo el código en Eclipse.
+
 Módulo Maven: [`P3-CalSo-base/`](P3-CalSo-base/) · Workflow: [`.github/workflows/p3-quality.yml`](../.github/workflows/p3-quality.yml)
 
 ---
@@ -80,12 +82,12 @@ Las salidas por excepción de los nodos 1 y 2 van directamente al nodo final F.
 
 | Método | Nodo o camino identificado | Datos de entrada y fecha | Resultado esperado según especificación | Nombre del test | Resultado ejecución |
 |---|---|---|---|---|---|
-| `containsAllRequiredWeapons` | C1 | `available = null`, `required = {Katana}` | `NullPointerException` con mensaje `Available weapons are required` | | |
-| `containsAllRequiredWeapons` | C2 | `available = {Katana}`, `required = null` | `NullPointerException` con mensaje `Required weapons are required` | | |
-| `containsAllRequiredWeapons` | C3 | `available = {Katana}`, `required = {}` | `true` (la especificación lo indica también para `required` vacío) | | |
-| `containsAllRequiredWeapons` | C4 | `available = {}`, `required = {Katana}` | `false` | | |
-| `containsAllRequiredWeapons` | C5 (a) | `available = {Katana}`, `required = {Katana}` | `true` | | |
-| `containsAllRequiredWeapons` | C5 (b) | `available = {Bo}`, `required = {Katana}` | `false`: falta la Katana. Con el código actual recorre C5 y devuelve `true`, porque solo comprueba si `available` está vacío | | |
+| `containsAllRequiredWeapons` | C1 | `available = null`, `required = {Katana}` | `NullPointerException` con mensaje `Available weapons are required` | `testGivenNullAvailableAndRequiredKatanaWhenCheckingWeaponsThenThrowsAvailableWeaponsAreRequired` | Pasa |
+| `containsAllRequiredWeapons` | C2 | `available = {Katana}`, `required = null` | `NullPointerException` con mensaje `Required weapons are required` | `testGivenAvailableKatanaAndNullRequiredWhenCheckingWeaponsThenThrowsRequiredWeaponsAreRequired` | Pasa |
+| `containsAllRequiredWeapons` | C3 | `available = {Katana}`, `required = {}` | `true` (la especificación lo indica también para `required` vacío) | `testGivenAvailableKatanaAndEmptyRequiredWhenCheckingWeaponsThenReturnsTrue` | Pasa |
+| `containsAllRequiredWeapons` | C4 | `available = {}`, `required = {Katana}` | `false` | `testGivenEmptyAvailableAndRequiredKatanaWhenCheckingWeaponsThenReturnsFalse` | Pasa |
+| `containsAllRequiredWeapons` | C5 (a) | `available = {Katana}`, `required = {Katana}` | `true` | `testGivenAvailableKatanaAndRequiredKatanaWhenCheckingWeaponsThenReturnsTrue` | Pasa |
+| `containsAllRequiredWeapons` | C5 (b) | `available = {Bo}`, `required = {Katana}` | `false`: falta la Katana. Con el código actual recorre C5 y devuelve `true`, porque solo comprueba si `available` está vacío | `testGivenAvailableBoAndRequiredKatanaWhenCheckingWeaponsThenReturnsFalse` | **Falla** (D1) |
 
 Fecha: este método no recibe fechas.
 
@@ -166,15 +168,15 @@ La decisión compuesta del nodo 9 se trata como un único nodo para los caminos;
 
 | Método | Nodo o camino identificado | Datos de entrada y fecha | Resultado esperado según especificación | Nombre del test | Resultado ejecución |
 |---|---|---|---|---|---|
-| `findFirstAvailableDojo` | C1 | `dojos = null`, armas {Katana}, sin reservas, 2026-11-20 | `NullPointerException` con mensaje `Dojos are required` | | |
-| `findFirstAvailableDojo` | C2 | `dojos = [D1]`, `requiredWeapons = null`, sin reservas, 2026-11-20 | `NullPointerException` con mensaje `Required weapons are required` | | |
-| `findFirstAvailableDojo` | C3 | `dojos = [D1]`, armas {Katana}, `reservations = null`, 2026-11-20 | `NullPointerException` con mensaje `Reservations are required` | | |
-| `findFirstAvailableDojo` | C4 | `dojos = [D1]`, armas {Katana}, sin reservas, `trainingDate = null` | `NullPointerException` con mensaje `Training date is required` | | |
-| `findFirstAvailableDojo` | C5 | `dojos = []`, armas {Katana}, sin reservas, 2026-11-20 | `Optional.empty()` | | |
-| `findFirstAvailableDojo` | C6 | `dojos = [D1 sin armas]`, armas {Katana}, sin reservas, 2026-11-20 | `Optional.empty()`: el dojo no tiene la Katana | | |
-| `findFirstAvailableDojo` | C7 | `dojos = [D1 {Katana}]`, armas {Katana}, sin reservas, 2026-11-20 | `Optional.of(D1)`: nadie lo ha reservado | | |
-| `findFirstAvailableDojo` | C8 | `dojos = [D1 {Katana}]`, armas {Katana}, reserva de D2 el 2026-11-20, entrenamiento 2026-11-20 | `Optional.of(D1)`: la reserva es de otro dojo | | |
-| `findFirstAvailableDojo` | C9 | `dojos = [D1 {Katana}]`, armas {Katana}, reserva de D1 el 2026-11-21, entrenamiento 2026-11-20 | `Optional.of(D1)`: la reserva es de otro día. Con el código actual devuelve `Optional.empty()` | | |
+| `findFirstAvailableDojo` | C1 | `dojos = null`, armas {Katana}, sin reservas, 2026-11-20 | `NullPointerException` con mensaje `Dojos are required` | `testGivenNullDojosWhenFindingFirstAvailableDojoThenThrowsDojosAreRequired` | Pasa |
+| `findFirstAvailableDojo` | C2 | `dojos = [D1]`, `requiredWeapons = null`, sin reservas, 2026-11-20 | `NullPointerException` con mensaje `Required weapons are required` | `testGivenNullRequiredWeaponsWhenFindingFirstAvailableDojoThenThrowsRequiredWeaponsAreRequired` | Pasa |
+| `findFirstAvailableDojo` | C3 | `dojos = [D1]`, armas {Katana}, `reservations = null`, 2026-11-20 | `NullPointerException` con mensaje `Reservations are required` | `testGivenNullReservationsWhenFindingFirstAvailableDojoThenThrowsReservationsAreRequired` | Pasa |
+| `findFirstAvailableDojo` | C4 | `dojos = [D1]`, armas {Katana}, sin reservas, `trainingDate = null` | `NullPointerException` con mensaje `Training date is required` | `testGivenNullTrainingDateWhenFindingFirstAvailableDojoThenThrowsTrainingDateIsRequired` | Pasa |
+| `findFirstAvailableDojo` | C5 | `dojos = []`, armas {Katana}, sin reservas, 2026-11-20 | `Optional.empty()` | `testGivenEmptyDojoListWhenFindingFirstAvailableDojoOn20261120ThenReturnsEmpty` | Pasa |
+| `findFirstAvailableDojo` | C6 | `dojos = [D1 sin armas]`, armas {Katana}, sin reservas, 2026-11-20 | `Optional.empty()`: el dojo no tiene la Katana | `testGivenOnlyDojoD1WithoutWeaponsAndRequiredKatanaWhenFindingFirstAvailableDojoOn20261120ThenReturnsEmpty` | Pasa |
+| `findFirstAvailableDojo` | C7 | `dojos = [D1 {Katana}]`, armas {Katana}, sin reservas, 2026-11-20 | `Optional.of(D1)`: nadie lo ha reservado | `testGivenDojoD1WithKatanaAndNoReservationsWhenFindingFirstAvailableDojoOn20261120ThenReturnsD1` | Pasa |
+| `findFirstAvailableDojo` | C8 | `dojos = [D1 {Katana}]`, armas {Katana}, reserva de D2 el 2026-11-20, entrenamiento 2026-11-20 | `Optional.of(D1)`: la reserva es de otro dojo | `testGivenDojoD1AndReservationOfD2On20261120WhenFindingFirstAvailableDojoOn20261120ThenReturnsD1` | Pasa |
+| `findFirstAvailableDojo` | C9 | `dojos = [D1 {Katana}]`, armas {Katana}, reserva de D1 el 2026-11-21, entrenamiento 2026-11-20 | `Optional.of(D1)`: la reserva es de otro día. Con el código actual devuelve `Optional.empty()` | `testGivenDojoD1AndReservationOfD1On20261121WhenFindingFirstAvailableDojoOn20261120ThenReturnsD1` | **Falla** (D2) |
 
 **Elección del dato de C6:** se usa un dojo sin ninguna arma. Un dojo con armas distintas de la Katana sería considerado compatible por el defecto previsto en `containsAllRequiredWeapons` y no recorrería C6; así se separa el recorrido del método estudiado de los errores del método auxiliar.
 
@@ -256,12 +258,12 @@ Los seis caminos son factibles. Recorridos imposibles que conviene señalar: en 
 
 | Método | Nodo o camino identificado | Datos de entrada y fecha | Resultado esperado según especificación | Nombre del test | Resultado ejecución |
 |---|---|---|---|---|---|
-| `findYoungestFighter` | C1 | `fighters = null`, referencia 2026-11-20 | `NullPointerException` con mensaje `Fighters are required` | | |
-| `findYoungestFighter` | C2 | `[Ana (2000-05-10)]`, `referenceDate = null` | `NullPointerException` con mensaje `Reference date is required` | | |
-| `findYoungestFighter` | C3 | `[]`, referencia 2026-11-20 | `Optional.empty()` | | |
-| `findYoungestFighter` | C4 | `[null]`, referencia 2026-11-20 | `NullPointerException` con mensaje `Null fighter` | | |
-| `findYoungestFighter` | C5 | `[Ana (2000-05-10)]`, referencia 2026-11-20 | `Optional.of(Ana)` | | |
-| `findYoungestFighter` | C6 | `[Ana (2000-05-10), Bea (2005-03-15)]`, referencia 2026-11-20 | `Optional.of(Bea)`: fecha de nacimiento más reciente. Con el código actual devuelve Ana | | |
+| `findYoungestFighter` | C1 | `fighters = null`, referencia 2026-11-20 | `NullPointerException` con mensaje `Fighters are required` | `testGivenNullFightersWhenFindingYoungestFighterThenThrowsFightersAreRequired` | Pasa |
+| `findYoungestFighter` | C2 | `[Ana (2000-05-10)]`, `referenceDate = null` | `NullPointerException` con mensaje `Reference date is required` | `testGivenAnaBorn20000510AndNullReferenceDateWhenFindingYoungestFighterThenThrowsReferenceDateIsRequired` | Pasa |
+| `findYoungestFighter` | C3 | `[]`, referencia 2026-11-20 | `Optional.empty()` | `testGivenEmptyFighterListWhenFindingYoungestFighterThenReturnsEmpty` | Pasa |
+| `findYoungestFighter` | C4 | `[null]`, referencia 2026-11-20 | `NullPointerException` con mensaje `Null fighter` | `testGivenListWithNullFighterWhenFindingYoungestFighterThenThrowsNullFighter` | Pasa |
+| `findYoungestFighter` | C5 | `[Ana (2000-05-10)]`, referencia 2026-11-20 | `Optional.of(Ana)` | `testGivenOnlyAnaBorn20000510WhenFindingYoungestFighterThenReturnsAna` | Pasa |
+| `findYoungestFighter` | C6 | `[Ana (2000-05-10), Bea (2005-03-15)]`, referencia 2026-11-20 | `Optional.of(Bea)`: fecha de nacimiento más reciente. Con el código actual devuelve Ana | `testGivenAnaBorn20000510ThenBeaBorn20050315WhenFindingYoungestFighterThenReturnsBea` | **Falla** (D3) |
 
 **Defecto previsto en el diseño:** la comparación usa `isBefore`, que se queda con la fecha de nacimiento más **antigua**, es decir, con el luchador de más edad. La especificación pide el de fecha de nacimiento más reciente. C6 debe revelarlo al ejecutarse.
 
@@ -394,18 +396,18 @@ Fecha de entrenamiento de todos los casos: **2026-11-20**. Ana nació el 1996-01
 
 | Método | Nodo o camino identificado | Datos de entrada y fecha | Resultado esperado según especificación | Nombre del test | Resultado ejecución |
 |---|---|---|---|---|---|
-| `calculateBestDiscount` | C1 | `fighters = null`, 2026-11-20 | `NullPointerException` con mensaje `Fighters are required` | | |
-| `calculateBestDiscount` | C2 | `[Ana]`, `trainingDate = null` | `NullPointerException` con mensaje `Training date is required` | | |
-| `calculateBestDiscount` | C3 | `[]`, 2026-11-20 | `Discount(0)` | | |
-| `calculateBestDiscount` | C5 | `[Ana]` sin paro, 2026-11-20 | `Discount(0)` | | |
-| `calculateBestDiscount` | C6 | `[Bea]` sin paro, 2026-11-20 | `Discount(15)` | | |
-| `calculateBestDiscount` | C9 | `[Ana]` en paro desde 2023-11-20 (3 años justos), 2026-11-20 | `Discount(30)` | | |
-| `calculateBestDiscount` | C10 | `[Ana]` en paro desde 2026-05-01 (0 años), 2026-11-20 | `Discount(0)` | | |
-| `calculateBestDiscount` | C11 | `[Ana]` en paro desde 2025-11-20 (1 año justo), 2026-11-20 | `Discount(10)` | | |
-| `calculateBestDiscount` | C13 | `[Bea]` en paro desde 2025-06-01 (1 año), 2026-11-20 | `Discount(15)`: no se suman, gana el mayor | | |
-| `calculateBestDiscount` | C14 | `[Ana` en paro desde 2023-11-20, `Carlos` en paro desde 2025-11-20`]`, 2026-11-20 | `Discount(30)`: el mayor de 30 y 10 | | |
-| `calculateBestDiscount` | Adicional: 2 años de paro (dato de C12) | `[Ana]` en paro desde 2024-11-20 (2 años justos), 2026-11-20 | `Discount(20)`. Con el código actual da `Discount(10)` | | |
-| `calculateBestDiscount` | Adicional: adulto y menor | `[Ana, Bea]` sin paro, 2026-11-20 | `Discount(15)`: la más joven tiene 17 años. Con el código actual da `Discount(0)`, porque `findYoungestFighter` devuelve a Ana | | |
+| `calculateBestDiscount` | C1 | `fighters = null`, 2026-11-20 | `NullPointerException` con mensaje `Fighters are required` | `testGivenNullFightersWhenCalculatingBestDiscountThenThrowsFightersAreRequired` | Pasa |
+| `calculateBestDiscount` | C2 | `[Ana]`, `trainingDate = null` | `NullPointerException` con mensaje `Training date is required` | `testGivenAnaBorn19960110AndNullTrainingDateWhenCalculatingBestDiscountThenThrowsTrainingDateIsRequired` | Pasa |
+| `calculateBestDiscount` | C3 | `[]`, 2026-11-20 | `Discount(0)` | `testGivenEmptyFighterListWhenCalculatingBestDiscountOn20261120ThenReturnsDiscount0` | Pasa |
+| `calculateBestDiscount` | C5 | `[Ana]` sin paro, 2026-11-20 | `Discount(0)` | `testGivenAnaAged30WithoutUnemploymentWhenCalculatingBestDiscountOn20261120ThenReturnsDiscount0` | Pasa |
+| `calculateBestDiscount` | C6 | `[Bea]` sin paro, 2026-11-20 | `Discount(15)` | `testGivenBeaAged17WithoutUnemploymentWhenCalculatingBestDiscountOn20261120ThenReturnsDiscount15` | Pasa |
+| `calculateBestDiscount` | C9 | `[Ana]` en paro desde 2023-11-20 (3 años justos), 2026-11-20 | `Discount(30)` | `testGivenAnaUnemployedSince20231120WhenCalculatingBestDiscountOn20261120ThenReturnsDiscount30` | Pasa |
+| `calculateBestDiscount` | C10 | `[Ana]` en paro desde 2026-05-01 (0 años), 2026-11-20 | `Discount(0)` | `testGivenAnaUnemployedSince20260501WhenCalculatingBestDiscountOn20261120ThenReturnsDiscount0` | Pasa |
+| `calculateBestDiscount` | C11 | `[Ana]` en paro desde 2025-11-20 (1 año justo), 2026-11-20 | `Discount(10)` | `testGivenAnaUnemployedSince20251120WhenCalculatingBestDiscountOn20261120ThenReturnsDiscount10` | Pasa |
+| `calculateBestDiscount` | C13 | `[Bea]` en paro desde 2025-06-01 (1 año), 2026-11-20 | `Discount(15)`: no se suman, gana el mayor | `testGivenBeaAged17UnemployedSince20250601WhenCalculatingBestDiscountOn20261120ThenReturnsDiscount15` | Pasa |
+| `calculateBestDiscount` | C14 | `[Ana` en paro desde 2023-11-20, `Carlos` en paro desde 2025-11-20`]`, 2026-11-20 | `Discount(30)`: el mayor de 30 y 10 | `testGivenAnaUnemployed3YearsThenCarlosUnemployed1YearWhenCalculatingBestDiscountOn20261120ThenReturnsDiscount30` | Pasa |
+| `calculateBestDiscount` | Adicional: 2 años de paro (dato de C12) | `[Ana]` en paro desde 2024-11-20 (2 años justos), 2026-11-20 | `Discount(20)`. Con el código actual da `Discount(10)` | `testGivenAnaUnemployedSince20241120WhenCalculatingBestDiscountOn20261120ThenReturnsDiscount20` | **Falla** (D4) |
+| `calculateBestDiscount` | Adicional: adulto y menor | `[Ana, Bea]` sin paro, 2026-11-20 | `Discount(15)`: la más joven tiene 17 años. Con el código actual da `Discount(0)`, porque `findYoungestFighter` devuelve a Ana | `testGivenAnaAged30AndBeaAged17WhenCalculatingBestDiscountOn20261120ThenReturnsDiscount15` | **Falla** (D3) |
 
 **Defectos previstos en el diseño:**
 
@@ -416,15 +418,58 @@ Fecha de entrenamiento de todos los casos: **2026-11-20**. Ana nació el 1996-01
 
 #### Camino → prueba
 
+Pruebas en [`DojoSearchServiceTest`](P3-CalSo-base/src/test/java/es/um/calso/dojoreservation/domain/service/DojoSearchServiceTest.java) (apartados 2.1 y 2.2) y [`ReservationDiscountServiceTest`](P3-CalSo-base/src/test/java/es/um/calso/dojoreservation/domain/service/ReservationDiscountServiceTest.java) (apartados 2.3 y 2.4).
+
 | Método | Camino | Prueba JUnit |
 |---|---|---|
-| | | |
+| `containsAllRequiredWeapons` | C1 | `testGivenNullAvailableAndRequiredKatanaWhenCheckingWeaponsThenThrowsAvailableWeaponsAreRequired` |
+| `containsAllRequiredWeapons` | C2 | `testGivenAvailableKatanaAndNullRequiredWhenCheckingWeaponsThenThrowsRequiredWeaponsAreRequired` |
+| `containsAllRequiredWeapons` | C3 | `testGivenAvailableKatanaAndEmptyRequiredWhenCheckingWeaponsThenReturnsTrue` |
+| `containsAllRequiredWeapons` | C4 | `testGivenEmptyAvailableAndRequiredKatanaWhenCheckingWeaponsThenReturnsFalse` |
+| `containsAllRequiredWeapons` | C5 (a) | `testGivenAvailableKatanaAndRequiredKatanaWhenCheckingWeaponsThenReturnsTrue` |
+| `containsAllRequiredWeapons` | C5 (b) | `testGivenAvailableBoAndRequiredKatanaWhenCheckingWeaponsThenReturnsFalse` |
+| `findFirstAvailableDojo` | C1 | `testGivenNullDojosWhenFindingFirstAvailableDojoThenThrowsDojosAreRequired` |
+| `findFirstAvailableDojo` | C2 | `testGivenNullRequiredWeaponsWhenFindingFirstAvailableDojoThenThrowsRequiredWeaponsAreRequired` |
+| `findFirstAvailableDojo` | C3 | `testGivenNullReservationsWhenFindingFirstAvailableDojoThenThrowsReservationsAreRequired` |
+| `findFirstAvailableDojo` | C4 | `testGivenNullTrainingDateWhenFindingFirstAvailableDojoThenThrowsTrainingDateIsRequired` |
+| `findFirstAvailableDojo` | C5 | `testGivenEmptyDojoListWhenFindingFirstAvailableDojoOn20261120ThenReturnsEmpty` |
+| `findFirstAvailableDojo` | C6 | `testGivenOnlyDojoD1WithoutWeaponsAndRequiredKatanaWhenFindingFirstAvailableDojoOn20261120ThenReturnsEmpty` |
+| `findFirstAvailableDojo` | C7 | `testGivenDojoD1WithKatanaAndNoReservationsWhenFindingFirstAvailableDojoOn20261120ThenReturnsD1` |
+| `findFirstAvailableDojo` | C8 | `testGivenDojoD1AndReservationOfD2On20261120WhenFindingFirstAvailableDojoOn20261120ThenReturnsD1` |
+| `findFirstAvailableDojo` | C9 | `testGivenDojoD1AndReservationOfD1On20261121WhenFindingFirstAvailableDojoOn20261120ThenReturnsD1` |
+| `findFirstAvailableDojo` | CC1 (cobertura de condiciones) | `testGivenDojosD1AndD2AndReservationOfD1On20261120WhenFindingFirstAvailableDojoOn20261120ThenReturnsD2` |
+| `findYoungestFighter` | C1 | `testGivenNullFightersWhenFindingYoungestFighterThenThrowsFightersAreRequired` |
+| `findYoungestFighter` | C2 | `testGivenAnaBorn20000510AndNullReferenceDateWhenFindingYoungestFighterThenThrowsReferenceDateIsRequired` |
+| `findYoungestFighter` | C3 | `testGivenEmptyFighterListWhenFindingYoungestFighterThenReturnsEmpty` |
+| `findYoungestFighter` | C4 | `testGivenListWithNullFighterWhenFindingYoungestFighterThenThrowsNullFighter` |
+| `findYoungestFighter` | C5 | `testGivenOnlyAnaBorn20000510WhenFindingYoungestFighterThenReturnsAna` |
+| `findYoungestFighter` | C6 | `testGivenAnaBorn20000510ThenBeaBorn20050315WhenFindingYoungestFighterThenReturnsBea` |
+| `findYoungestFighter` | CC2 (cobertura de condiciones) | `testGivenBeaBorn20050315ThenAnaBorn20000510WhenFindingYoungestFighterThenReturnsBea` |
+| `calculateBestDiscount` | C1 | `testGivenNullFightersWhenCalculatingBestDiscountThenThrowsFightersAreRequired` |
+| `calculateBestDiscount` | C2 | `testGivenAnaBorn19960110AndNullTrainingDateWhenCalculatingBestDiscountThenThrowsTrainingDateIsRequired` |
+| `calculateBestDiscount` | C3 | `testGivenEmptyFighterListWhenCalculatingBestDiscountOn20261120ThenReturnsDiscount0` |
+| `calculateBestDiscount` | C5 | `testGivenAnaAged30WithoutUnemploymentWhenCalculatingBestDiscountOn20261120ThenReturnsDiscount0` |
+| `calculateBestDiscount` | C6 | `testGivenBeaAged17WithoutUnemploymentWhenCalculatingBestDiscountOn20261120ThenReturnsDiscount15` |
+| `calculateBestDiscount` | C9 | `testGivenAnaUnemployedSince20231120WhenCalculatingBestDiscountOn20261120ThenReturnsDiscount30` |
+| `calculateBestDiscount` | C10 | `testGivenAnaUnemployedSince20260501WhenCalculatingBestDiscountOn20261120ThenReturnsDiscount0` |
+| `calculateBestDiscount` | C11 | `testGivenAnaUnemployedSince20251120WhenCalculatingBestDiscountOn20261120ThenReturnsDiscount10` |
+| `calculateBestDiscount` | C13 | `testGivenBeaAged17UnemployedSince20250601WhenCalculatingBestDiscountOn20261120ThenReturnsDiscount15` |
+| `calculateBestDiscount` | C14 | `testGivenAnaUnemployed3YearsThenCarlosUnemployed1YearWhenCalculatingBestDiscountOn20261120ThenReturnsDiscount30` |
+| `calculateBestDiscount` | Adicional: 2 años de paro (dato de C12) | `testGivenAnaUnemployedSince20241120WhenCalculatingBestDiscountOn20261120ThenReturnsDiscount20` |
+| `calculateBestDiscount` | Adicional: adulto y menor | `testGivenAnaAged30AndBeaAged17WhenCalculatingBestDiscountOn20261120ThenReturnsDiscount15` |
 
 #### Condición atómica / valor → prueba
 
 | Decisión | Condición atómica | Valor | Prueba JUnit |
 |---|---|---|---|
-| | | | |
+| `findFirstAvailableDojo`, bucle de reservas (`&&`) | A: `reservation.dojoId().equals(dojo.id())` | verdadero | `testGivenDojoD1AndReservationOfD1On20261121WhenFindingFirstAvailableDojoOn20261120ThenReturnsD1` (C9) |
+| | A | falso | `testGivenDojoD1AndReservationOfD2On20261120WhenFindingFirstAvailableDojoOn20261120ThenReturnsD1` (C8) |
+| | B: `!reservation.trainingDate().equals(trainingDate)` | verdadero | `testGivenDojoD1AndReservationOfD1On20261121WhenFindingFirstAvailableDojoOn20261120ThenReturnsD1` (C9) |
+| | B | falso | `testGivenDojosD1AndD2AndReservationOfD1On20261120WhenFindingFirstAvailableDojoOn20261120ThenReturnsD2` (CC1) |
+| `findYoungestFighter`, luchador más joven (`\|\|`) | A: `youngest == null` | verdadero | `testGivenOnlyAnaBorn20000510WhenFindingYoungestFighterThenReturnsAna` (C5) |
+| | A | falso | `testGivenAnaBorn20000510ThenBeaBorn20050315WhenFindingYoungestFighterThenReturnsBea` (C6, segunda vuelta) |
+| | B: `fighter.birthDate().isBefore(youngest.birthDate())` | verdadero | `testGivenBeaBorn20050315ThenAnaBorn20000510WhenFindingYoungestFighterThenReturnsBea` (CC2) |
+| | B | falso | `testGivenAnaBorn20000510ThenBeaBorn20050315WhenFindingYoungestFighterThenReturnsBea` (C6) |
 
 ---
 
