@@ -263,7 +263,7 @@ Los seis caminos son factibles. Recorridos imposibles que conviene señalar: en 
 | `findYoungestFighter` | C3 | `[]`, referencia 2026-11-20 | `Optional.empty()` | `testGivenEmptyFighterListWhenFindingYoungestFighterThenReturnsEmpty` | Pasa |
 | `findYoungestFighter` | C4 | `[null]`, referencia 2026-11-20 | `NullPointerException` con mensaje `Null fighter` | `testGivenListWithNullFighterWhenFindingYoungestFighterThenThrowsNullFighter` | Pasa |
 | `findYoungestFighter` | C5 | `[Ana (2000-05-10)]`, referencia 2026-11-20 | `Optional.of(Ana)` | `testGivenOnlyAnaBorn20000510WhenFindingYoungestFighterThenReturnsAna` | Pasa |
-| `findYoungestFighter` | C6 | `[Ana (2000-05-10), Bea (2005-03-15)]`, referencia 2026-11-20 | `Optional.of(Bea)`: fecha de nacimiento más reciente. Con el código actual devuelve Ana | `testGivenAnaBorn20000510ThenBeaBorn20050315WhenFindingYoungestFighterThenReturnsBea` | **Falla** (D3) |
+| `findYoungestFighter` | C6 | `[Ana (2000-05-10), Bea (2005-03-15)]`, referencia 2026-11-20 | `Optional.of(Bea)`: fecha de nacimiento más reciente. Con el código actual devuelve Ana | `testGivenAnaBorn20000510ThenBeaBorn20050315WhenFindingYoungestFighterThenReturnsBea` | Falla con el código original (D3). Pasa tras corregirlo |
 
 **Defecto previsto en el diseño:** la comparación usa `isBefore`, que se queda con la fecha de nacimiento más **antigua**, es decir, con el luchador de más edad. La especificación pide el de fecha de nacimiento más reciente. C6 debe revelarlo al ejecutarse.
 
@@ -283,6 +283,8 @@ Por el cortocircuito de `||`, B solo se evalúa cuando A es falsa, es decir, des
 |---|---|---|---|---|
 | A: `youngest == null` | C5 | C6 | — | — |
 | B: `fighter.birthDate().isBefore(youngest.birthDate())` | CC2 | C6 | CC2: `[Bea (2005-03-15), Ana (2000-05-10)]`, referencia 2026-11-20. Esperado: `Optional.of(Bea)`. Con el código actual devuelve Ana | B no puede evaluarse con A verdadera: en la primera vuelta lo impide el cortocircuito y desde la segunda A es siempre falsa. No impide cubrir sus dos valores |
+
+**Tras corregir D3:** la condición B pasa a ser `fighter.birthDate().isAfter(youngest.birthDate())`. Las tablas de cobertura de condiciones de 2.3 describen el código original; con el código corregido, C6 evalúa B verdadera y CC2 la evalúa falsa, así que B sigue cubierta en sus dos valores con las mismas pruebas.
 
 ### 2.4. `ReservationDiscountService.calculateBestDiscount`
 
@@ -407,7 +409,7 @@ Fecha de entrenamiento de todos los casos: **2026-11-20**. Ana nació el 1996-01
 | `calculateBestDiscount` | C13 | `[Bea]` en paro desde 2025-06-01 (1 año), 2026-11-20 | `Discount(15)`: no se suman, gana el mayor | `testGivenBeaAged17UnemployedSince20250601WhenCalculatingBestDiscountOn20261120ThenReturnsDiscount15` | Pasa |
 | `calculateBestDiscount` | C14 | `[Ana` en paro desde 2023-11-20, `Carlos` en paro desde 2025-11-20`]`, 2026-11-20 | `Discount(30)`: el mayor de 30 y 10 | `testGivenAnaUnemployed3YearsThenCarlosUnemployed1YearWhenCalculatingBestDiscountOn20261120ThenReturnsDiscount30` | Pasa |
 | `calculateBestDiscount` | Adicional: 2 años de paro (dato de C12) | `[Ana]` en paro desde 2024-11-20 (2 años justos), 2026-11-20 | `Discount(20)`. Con el código actual da `Discount(10)` | `testGivenAnaUnemployedSince20241120WhenCalculatingBestDiscountOn20261120ThenReturnsDiscount20` | **Falla** (D4) |
-| `calculateBestDiscount` | Adicional: adulto y menor | `[Ana, Bea]` sin paro, 2026-11-20 | `Discount(15)`: la más joven tiene 17 años. Con el código actual da `Discount(0)`, porque `findYoungestFighter` devuelve a Ana | `testGivenAnaAged30AndBeaAged17WhenCalculatingBestDiscountOn20261120ThenReturnsDiscount15` | **Falla** (D3) |
+| `calculateBestDiscount` | Adicional: adulto y menor | `[Ana, Bea]` sin paro, 2026-11-20 | `Discount(15)`: la más joven tiene 17 años. Con el código actual da `Discount(0)`, porque `findYoungestFighter` devuelve a Ana | `testGivenAnaAged30AndBeaAged17WhenCalculatingBestDiscountOn20261120ThenReturnsDiscount15` | Falla con el código original (D3). Pasa tras corregirlo |
 
 **Defectos previstos en el diseño:**
 
@@ -523,6 +525,7 @@ Pruebas en [`DojoSearchServiceTest`](P3-CalSo-base/src/test/java/es/um/calso/doj
 |---|---|---|---|---|---|---|
 | D1 | `containsAllRequiredWeapons({Bo}, {Katana})` devuelve `true` aunque falta la Katana | `testGivenAvailableBoAndRequiredKatanaWhenCheckingWeaponsThenReturnsFalse` (C5 b) | El bucle comprueba `available.isEmpty()` en lugar de si contiene cada arma requerida | `if (available.isEmpty())` → `if (!available.contains(weapon))` | Pasan 33 de 39 pruebas del paquete `domain.service`; fallan 6, todas de defectos aún sin corregir (D2, D3, D4). Ninguna prueba que pasaba ha dejado de pasar | «P3 - D1 - containsAllRequiredWeapons comprueba cada arma requerida» |
 | D2 | Un dojo con una reserva otro día se considera ocupado, y uno reservado ese mismo día se considera libre | `testGivenDojoD1AndReservationOfD1On20261121When…ThenReturnsD1` (C9) y `testGivenDojosD1AndD2AndReservationOfD1On20261120When…ThenReturnsD2` (CC1) | La condición de ocupación tiene la comparación de fechas negada (`!`) | `&& !reservation.trainingDate().equals(trainingDate)` → `&& reservation.trainingDate().equals(trainingDate)` | Pasan 35 de 39 pruebas del paquete `domain.service`; fallan 4, todas de defectos aún sin corregir (D3, D4). Ninguna prueba que pasaba ha dejado de pasar | «P3 - D2 - findFirstAvailableDojo descarta el dojo reservado ese mismo día» |
+| D3 | `findYoungestFighter` devuelve al luchador de más edad; el equipo con un adulto y un menor pierde el 15 % | `testGivenAnaBorn20000510ThenBeaBorn20050315When…ThenReturnsBea` (C6), `testGivenBeaBorn20050315ThenAnaBorn20000510When…ThenReturnsBea` (CC2) y `testGivenAnaAged30AndBeaAged17When…ThenReturnsDiscount15` (adicional de 2.4) | Se sustituye al candidato cuando nació **antes** (`isBefore`), es decir, cuando es mayor | `isBefore(youngest.birthDate())` → `isAfter(youngest.birthDate())` | Pasan 38 de 39 pruebas del paquete `domain.service`; fallan 1, todas de defectos aún sin corregir (D4). Ninguna prueba que pasaba ha dejado de pasar | «P3 - D3 - findYoungestFighter devuelve el luchador más joven» |
 
 ---
 
